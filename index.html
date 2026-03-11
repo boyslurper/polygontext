@@ -15,7 +15,6 @@
     overflow: hidden;
   }
 
-  /* --- Sidebar --- */
   .sidebar {
     width: 340px;
     min-width: 340px;
@@ -74,7 +73,7 @@
     color: #e0e0e0;
     font-size: 13px;
   }
-  textarea { min-height: 60px; }
+  textarea { min-height: 50px; }
   input[type="file"] { display: none; }
   .btn {
     display: inline-block;
@@ -86,126 +85,59 @@
     font-weight: 600;
     transition: background 0.2s;
   }
-  .btn-primary {
-    background: #b9cf3d;
-    color: #1a1a1a;
-  }
+  .btn-primary { background: #b9cf3d; color: #1a1a1a; }
   .btn-primary:hover { background: #a8be2c; }
-  .btn-secondary {
-    background: #444;
-    color: #e0e0e0;
-  }
+  .btn-secondary { background: #444; color: #e0e0e0; }
   .btn-secondary:hover { background: #555; }
-  .btn-row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .range-row {
-    margin-bottom: 10px;
-  }
-  .range-row .range-value {
-    float: right;
-    font-size: 12px;
-    color: #b9cf3d;
-  }
-  .color-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 6px;
-    align-items: center;
-  }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .range-row { margin-bottom: 10px; }
+  .range-row .range-value { float: right; font-size: 12px; color: #b9cf3d; }
+  .color-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; align-items: center; }
   .color-chip {
-    width: 28px;
-    height: 28px;
-    border-radius: 4px;
-    border: 2px solid #555;
-    cursor: pointer;
-    position: relative;
+    width: 28px; height: 28px; border-radius: 4px;
+    border: 2px solid #555; cursor: pointer; position: relative;
   }
   .color-chip:hover { border-color: #b9cf3d; }
   .color-chip .remove {
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    width: 14px;
-    height: 14px;
-    background: #e44;
-    color: #fff;
-    border-radius: 50%;
-    font-size: 10px;
-    line-height: 14px;
-    text-align: center;
-    display: none;
-    cursor: pointer;
+    position: absolute; top: -6px; right: -6px;
+    width: 14px; height: 14px; background: #e44; color: #fff;
+    border-radius: 50%; font-size: 10px; line-height: 14px;
+    text-align: center; display: none; cursor: pointer;
   }
   .color-chip:hover .remove { display: block; }
   .add-color-btn {
-    width: 28px;
-    height: 28px;
-    border-radius: 4px;
-    border: 2px dashed #666;
-    background: transparent;
-    color: #999;
-    font-size: 18px;
-    line-height: 24px;
-    text-align: center;
-    cursor: pointer;
+    width: 28px; height: 28px; border-radius: 4px;
+    border: 2px dashed #666; background: transparent;
+    color: #999; font-size: 18px; line-height: 24px;
+    text-align: center; cursor: pointer;
   }
   .add-color-btn:hover { border-color: #b9cf3d; color: #b9cf3d; }
-
   select {
-    width: 100%;
-    padding: 6px 8px;
-    border: 1px solid #444;
-    border-radius: 4px;
-    background: #1a1a1a;
-    color: #e0e0e0;
-    font-size: 13px;
-    margin-bottom: 6px;
+    width: 100%; padding: 6px 8px; border: 1px solid #444;
+    border-radius: 4px; background: #1a1a1a; color: #e0e0e0;
+    font-size: 13px; margin-bottom: 6px;
   }
-
-  .checkbox-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
-  }
-  .checkbox-row input[type="checkbox"] {
-    accent-color: #b9cf3d;
-  }
-
-  .inline-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .checkbox-row input[type="checkbox"] { accent-color: #b9cf3d; }
+  .inline-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .inline-row label { margin: 0; white-space: nowrap; }
   .inline-row .x-sep { color: #666; font-size: 14px; }
+  .pos-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+  .pos-row label { margin: 0; min-width: 14px; }
+  .pos-row input[type="number"] { width: 60px; }
 
-  /* --- Main area --- */
   .main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    flex: 1; display: flex; flex-direction: column; overflow: hidden;
   }
   .toolbar {
-    padding: 10px 20px;
-    background: #242424;
+    padding: 10px 20px; background: #242424;
     border-bottom: 1px solid #333;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    display: flex; align-items: center; gap: 12px;
   }
   .preview-wrap {
-    flex: 1;
-    overflow: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    flex: 1; overflow: auto;
+    display: flex; align-items: center; justify-content: center;
     background: #111;
     background-image:
       linear-gradient(45deg, #1a1a1a 25%, transparent 25%),
@@ -214,37 +146,69 @@
       linear-gradient(-45deg, transparent 75%, #1a1a1a 75%);
     background-size: 20px 20px;
     background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+    position: relative;
   }
   #previewCanvas {
-    max-width: 95%;
-    max-height: 95%;
-    image-rendering: auto;
+    max-width: 95%; max-height: 95%; image-rendering: auto;
+    cursor: grab;
   }
-  .hidden-input { position: absolute; left: -9999px; }
+  #previewCanvas:active { cursor: grabbing; }
+  .drag-hint {
+    position: absolute; bottom: 10px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px; color: #666; pointer-events: none;
+  }
 </style>
 </head>
 <body>
 
-<!-- Sidebar Controls -->
 <div class="sidebar">
   <h1>Polygon Art Generator</h1>
 
-  <!-- Input source -->
+  <!-- Image layer -->
   <div class="section">
-    <h2>Input</h2>
+    <h2>Image Layer</h2>
     <div class="btn-row" style="margin-bottom:10px;">
-      <button class="btn btn-primary" id="btnUpload">Upload Image</button>
+      <button class="btn btn-primary btn-sm" id="btnUpload">Upload Image</button>
       <input type="file" id="fileInput" accept="image/*">
-      <button class="btn btn-secondary" id="btnUseText">Use Text</button>
+      <button class="btn btn-secondary btn-sm" id="btnClearImage">Clear</button>
     </div>
-    <label for="textInput">Text input:</label>
-    <textarea id="textInput" placeholder="Type text here...">HELLO</textarea>
-    <div class="range-row" style="margin-top:8px;">
-      <label>Text font size: <span class="range-value" id="fontSizeVal">120</span>px</label>
-      <input type="range" id="fontSize" min="20" max="400" value="120">
+    <div id="imageControls" style="display:none;">
+      <div class="pos-row">
+        <label>X:</label>
+        <input type="number" id="imgOffX" value="0">
+        <label>Y:</label>
+        <input type="number" id="imgOffY" value="0">
+      </div>
+      <div class="range-row">
+        <label>Image scale: <span class="range-value" id="imgScaleVal">100</span>%</label>
+        <input type="range" id="imgScale" min="10" max="400" value="100">
+      </div>
+      <span style="font-size:11px;color:#666;">Drag on the preview to reposition</span>
     </div>
-    <label for="fontSelect" style="margin-top:4px;">Font:</label>
-    <select id="fontSelect">
+  </div>
+
+  <!-- Text layer -->
+  <div class="section">
+    <h2>Text Layer</h2>
+    <div class="checkbox-row">
+      <input type="checkbox" id="textLayerEnabled" checked>
+      <label for="textLayerEnabled" style="margin:0;">Enabled</label>
+    </div>
+    <label for="textLayerInput">Text:</label>
+    <textarea id="textLayerInput" placeholder="Type text here...">HELLO</textarea>
+    <div class="pos-row" style="margin-top:6px;">
+      <label>X:</label>
+      <input type="number" id="textOffX" value="0">
+      <label>Y:</label>
+      <input type="number" id="textOffY" value="0">
+    </div>
+    <div class="range-row" style="margin-top:4px;">
+      <label>Font size: <span class="range-value" id="textSizeVal">120</span>px</label>
+      <input type="range" id="textSize" min="20" max="400" value="120">
+    </div>
+    <label for="textFont">Font:</label>
+    <select id="textFont">
       <option value="Arial Black">Arial Black</option>
       <option value="Impact">Impact</option>
       <option value="Georgia">Georgia</option>
@@ -252,21 +216,26 @@
       <option value="Verdana">Verdana</option>
       <option value="Times New Roman">Times New Roman</option>
     </select>
-    <div class="range-row" style="margin-top:8px;">
-      <label>Threshold (black/white): <span class="range-value" id="thresholdVal">128</span></label>
+  </div>
+
+  <!-- Source settings -->
+  <div class="section">
+    <h2>Source Processing</h2>
+    <div class="range-row">
+      <label>Threshold: <span class="range-value" id="thresholdVal">128</span></label>
       <input type="range" id="threshold" min="1" max="255" value="128">
     </div>
-    <div class="checkbox-row" style="margin-top:4px;">
+    <div class="checkbox-row">
       <input type="checkbox" id="invertInput">
-      <label for="invertInput" style="margin:0;">Invert input</label>
+      <label for="invertInput" style="margin:0;">Invert</label>
     </div>
   </div>
 
   <!-- Resolution -->
   <div class="section">
-    <h2>Resolution (polygon grid)</h2>
+    <h2>Resolution</h2>
     <div class="inline-row">
-      <label>Columns:</label>
+      <label>Cols:</label>
       <input type="number" id="resCols" value="40" min="3" max="500">
       <span class="x-sep">x</span>
       <label>Rows:</label>
@@ -274,35 +243,33 @@
     </div>
     <div class="checkbox-row">
       <input type="checkbox" id="lockAspect" checked>
-      <label for="lockAspect" style="margin:0;">Lock aspect ratio to input</label>
+      <label for="lockAspect" style="margin:0;">Lock aspect ratio</label>
     </div>
   </div>
 
-  <!-- Polygon shape: normal -->
+  <!-- Normal shape -->
   <div class="section">
     <h2>Normal Polygon Shape</h2>
-    <label for="normalShape">Shape:</label>
     <select id="normalShape">
-      <option value="filled">Filled only (Frenzelit)</option>
-      <option value="hollow">Hollow only (hohl)</option>
-      <option value="mixed" selected>Mixed filled + hollow</option>
+      <option value="filled">Filled (Frenzelit)</option>
+      <option value="hollow">Hollow (hohl)</option>
+      <option value="mixed" selected>Mixed</option>
     </select>
-    <div class="range-row" style="margin-top:8px;" id="normalMixRow">
+    <div class="range-row" style="margin-top:6px;" id="normalMixRow">
       <label>Filled ratio: <span class="range-value" id="normalMixVal">50</span>%</label>
       <input type="range" id="normalMix" min="0" max="100" value="50">
     </div>
   </div>
 
-  <!-- Polygon shape: highlight -->
+  <!-- Highlight shape -->
   <div class="section">
     <h2>Highlight Polygon Shape</h2>
-    <label for="highlightShape">Shape:</label>
     <select id="highlightShape">
-      <option value="filled" selected>Filled only (Frenzelit)</option>
-      <option value="hollow">Hollow only (hohl)</option>
-      <option value="mixed">Mixed filled + hollow</option>
+      <option value="filled" selected>Filled (Frenzelit)</option>
+      <option value="hollow">Hollow (hohl)</option>
+      <option value="mixed">Mixed</option>
     </select>
-    <div class="range-row" style="margin-top:8px;" id="highlightMixRow">
+    <div class="range-row" style="margin-top:6px;" id="highlightMixRow">
       <label>Filled ratio: <span class="range-value" id="highlightMixVal">50</span>%</label>
       <input type="range" id="highlightMix" min="0" max="100" value="50">
     </div>
@@ -311,7 +278,7 @@
   <!-- Fade -->
   <div class="section">
     <h2>Pattern Fade</h2>
-    <label for="fadeMode">Fade direction:</label>
+    <label for="fadeMode">Direction:</label>
     <select id="fadeMode">
       <option value="none" selected>None</option>
       <option value="content">From content outline</option>
@@ -322,15 +289,15 @@
       <option value="left">Left to right</option>
       <option value="right">Right to left</option>
     </select>
-    <div class="range-row" style="margin-top:8px;">
+    <div class="range-row" style="margin-top:6px;">
       <label>Fade reach: <span class="range-value" id="fadeStrengthVal">50</span>%</label>
       <input type="range" id="fadeStrength" min="0" max="100" value="50">
     </div>
-    <div class="checkbox-row" id="fadeOnlyNormalRow" style="margin-top:4px;">
+    <div class="checkbox-row">
       <input type="checkbox" id="fadeOnlyNormal" checked>
       <label for="fadeOnlyNormal" style="margin:0;">Only fade normal (keep highlights)</label>
     </div>
-    <label for="fadeEffect" style="margin-top:4px;">Fade effect:</label>
+    <label for="fadeEffect">Effect:</label>
     <select id="fadeEffect">
       <option value="skip" selected>Remove polygons</option>
       <option value="shrink">Shrink polygons</option>
@@ -338,7 +305,7 @@
     </select>
   </div>
 
-  <!-- Padding -->
+  <!-- Spacing -->
   <div class="section">
     <h2>Spacing</h2>
     <div class="range-row">
@@ -368,15 +335,15 @@
       <input type="checkbox" id="transparentBg" checked>
       <label for="transparentBg" style="margin:0;">Transparent</label>
     </div>
-    <label for="bgColor" style="margin-top:4px;">Background color:</label>
-    <input type="color" id="bgColor" value="#1a1a1a" style="width:100%;height:30px;border:1px solid #444;border-radius:4px;cursor:pointer;">
+    <label for="bgColor" style="margin-top:4px;">Color:</label>
+    <input type="color" id="bgColor" value="#1a1a1a" style="width:100%;height:28px;border:1px solid #444;border-radius:4px;cursor:pointer;">
   </div>
 
   <!-- Output -->
   <div class="section">
     <h2>Output</h2>
     <div class="range-row">
-      <label>Output scale: <span class="range-value" id="scaleVal">1</span>x</label>
+      <label>Export scale: <span class="range-value" id="scaleVal">1</span>x</label>
       <input type="range" id="outputScale" min="1" max="4" value="1" step="1">
     </div>
     <div class="btn-row" style="margin-top:8px;">
@@ -385,7 +352,6 @@
   </div>
 </div>
 
-<!-- Main preview area -->
 <div class="main">
   <div class="toolbar">
     <button class="btn btn-primary" id="btnGenerate">Generate</button>
@@ -393,66 +359,46 @@
   </div>
   <div class="preview-wrap">
     <canvas id="previewCanvas" width="800" height="600"></canvas>
+    <div class="drag-hint">Drag to move image layer</div>
   </div>
 </div>
 
-<!-- Hidden canvas for source image processing -->
 <canvas id="sourceCanvas" style="display:none;"></canvas>
 
 <script>
 (function() {
-  // =====================================================
-  // Embedded SVG polygon data from the repository files.
-  // We build Image objects from these SVGs at runtime so
-  // each polygon stamp is the *actual* repo artwork.
-  // =====================================================
-
-  // Hollow hexagon (hohl_polygon.svg) - viewBox 0 0 403 459.9298
+  // ---- Embedded SVG templates from repo ----
   const HOLLOW_SVG_TEMPLATE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 403 459.9298">
   <defs><style>.c{fill:none;stroke:{{COLOR}};stroke-linecap:round;stroke-linejoin:round;stroke-width:35px;}</style></defs>
   <polygon class="c" points="385.5 336.19735 385.5 123.73245 201.5 17.5 17.5 123.73245 17.5 336.19735 201.5 442.4298 385.5 336.19735"/>
 </svg>`;
 
-  // Filled hexagon (Frenzelit_Polygon_Flaeche) - viewBox 0 0 763.24 856.81
   const FILLED_SVG_TEMPLATE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 763.24 856.81">
   <defs><style>.c{fill:{{COLOR}};stroke:{{COLOR}};stroke-miterlimit:10;stroke-width:74px;}</style></defs>
   <path class="c" d="M374.2,39.66L47.34,225.23c-6.39,3.63-10.34,10.41-10.34,17.75v368.22c0,7.3,3.9,14.05,10.23,17.69l326.93,188.18c6.34,3.65,14.16,3.63,20.48-.06l321.48-187.75c6.27-3.66,10.12-10.37,10.12-17.63V245.3c0-7.26-3.85-13.97-10.12-17.63L394.58,39.79c-6.28-3.67-14.05-3.72-20.38-.13Z"/>
 </svg>`;
 
-  // Aspect ratios from the SVG viewBoxes
-  const HOLLOW_ASPECT = 403 / 459.9298;   // ~0.876 (width/height)
-  const FILLED_ASPECT = 763.24 / 856.81;  // ~0.891
+  const FILLED_ASPECT = 763.24 / 856.81;
 
   // ---- SVG stamp cache ----
-  // Key: "filled|#color|width|height" or "hollow|..."  -> offscreen canvas
   const stampCache = new Map();
 
-  function svgToDataURL(svgString) {
-    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
-  }
-
-  // Returns a promise that resolves to an offscreen canvas with the polygon drawn
   function getStamp(type, color, w, h) {
     const key = type + '|' + color + '|' + w + '|' + h;
     if (stampCache.has(key)) return Promise.resolve(stampCache.get(key));
-
     const template = type === 'filled' ? FILLED_SVG_TEMPLATE : HOLLOW_SVG_TEMPLATE;
     const svgStr = template.replace(/\{\{COLOR\}\}/g, color);
-    const url = svgToDataURL(svgStr);
-
+    const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
     return new Promise((resolve) => {
       const img = new Image();
       img.onload = () => {
         const c = document.createElement('canvas');
-        c.width = w;
-        c.height = h;
-        const ctx = c.getContext('2d');
-        ctx.drawImage(img, 0, 0, w, h);
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
         stampCache.set(key, c);
         resolve(c);
       };
       img.onerror = () => {
-        // fallback: blank canvas
         const c = document.createElement('canvas');
         c.width = w; c.height = h;
         stampCache.set(key, c);
@@ -462,15 +408,12 @@
     });
   }
 
-  // Pre-generate all stamps needed for a render, returns a map
   async function preloadStamps(types, colors, w, h) {
-    const promises = [];
     const map = new Map();
+    const promises = [];
     for (const t of types) {
       for (const c of colors) {
-        promises.push(getStamp(t, c, w, h).then(stamp => {
-          map.set(t + '|' + c, stamp);
-        }));
+        promises.push(getStamp(t, c, w, h).then(s => map.set(t + '|' + c, s)));
       }
     }
     await Promise.all(promises);
@@ -480,78 +423,76 @@
   // ---- State ----
   let normalColorList = ['#b9cf3d', '#b3a7d2', '#2f2b2a'];
   let highlightColorList = ['#b9cf3d', '#ffffff'];
-  let sourceImage = null;
-  let inputMode = 'text';
+  let uploadedImg = null; // HTMLImageElement of uploaded image
+  let sourceImage = null; // ImageData for sampling
   let generating = false;
 
   // ---- DOM refs ----
-  const fileInput = document.getElementById('fileInput');
-  const btnUpload = document.getElementById('btnUpload');
-  const btnUseText = document.getElementById('btnUseText');
-  const textInput = document.getElementById('textInput');
-  const fontSizeSlider = document.getElementById('fontSize');
-  const fontSizeVal = document.getElementById('fontSizeVal');
-  const fontSelect = document.getElementById('fontSelect');
-  const thresholdSlider = document.getElementById('threshold');
-  const thresholdVal = document.getElementById('thresholdVal');
-  const invertInput = document.getElementById('invertInput');
-  const normalShapeSelect = document.getElementById('normalShape');
-  const normalMixSlider = document.getElementById('normalMix');
-  const normalMixValEl = document.getElementById('normalMixVal');
-  const normalMixRow = document.getElementById('normalMixRow');
-  const highlightShapeSelect = document.getElementById('highlightShape');
-  const highlightMixSlider = document.getElementById('highlightMix');
-  const highlightMixValEl = document.getElementById('highlightMixVal');
-  const highlightMixRow = document.getElementById('highlightMixRow');
-  const fadeModeSelect = document.getElementById('fadeMode');
-  const fadeStrengthSlider = document.getElementById('fadeStrength');
-  const fadeStrengthValEl = document.getElementById('fadeStrengthVal');
-  const fadeEffectSelect = document.getElementById('fadeEffect');
-  const fadeOnlyNormalCheck = document.getElementById('fadeOnlyNormal');
-  const resColsInput = document.getElementById('resCols');
-  const resRowsInput = document.getElementById('resRows');
-  const lockAspectCheck = document.getElementById('lockAspect');
-  const paddingSlider = document.getElementById('padding');
-  const paddingVal = document.getElementById('paddingVal');
-  const highlightPaddingSlider = document.getElementById('highlightPadding');
-  const highlightPaddingVal = document.getElementById('highlightPaddingVal');
-  const transparentBg = document.getElementById('transparentBg');
-  const bgColorInput = document.getElementById('bgColor');
-  const outputScaleSlider = document.getElementById('outputScale');
-  const scaleVal = document.getElementById('scaleVal');
-  const btnGenerate = document.getElementById('btnGenerate');
-  const btnExport = document.getElementById('btnExport');
-  const previewCanvas = document.getElementById('previewCanvas');
-  const sourceCanvas = document.getElementById('sourceCanvas');
-  const statusText = document.getElementById('statusText');
-  const normalColorsEl = document.getElementById('normalColors');
-  const highlightColorsEl = document.getElementById('highlightColors');
+  const $ = id => document.getElementById(id);
+  const fileInput = $('fileInput');
+  const imageControls = $('imageControls');
+  const imgOffXInput = $('imgOffX');
+  const imgOffYInput = $('imgOffY');
+  const imgScaleSlider = $('imgScale');
+  const imgScaleVal = $('imgScaleVal');
+  const textLayerEnabled = $('textLayerEnabled');
+  const textLayerInput = $('textLayerInput');
+  const textOffXInput = $('textOffX');
+  const textOffYInput = $('textOffY');
+  const textSizeSlider = $('textSize');
+  const textSizeVal = $('textSizeVal');
+  const textFontSelect = $('textFont');
+  const thresholdSlider = $('threshold');
+  const thresholdValEl = $('thresholdVal');
+  const invertInput = $('invertInput');
+  const resColsInput = $('resCols');
+  const resRowsInput = $('resRows');
+  const lockAspectCheck = $('lockAspect');
+  const normalShapeSelect = $('normalShape');
+  const normalMixSlider = $('normalMix');
+  const normalMixValEl = $('normalMixVal');
+  const normalMixRow = $('normalMixRow');
+  const highlightShapeSelect = $('highlightShape');
+  const highlightMixSlider = $('highlightMix');
+  const highlightMixValEl = $('highlightMixVal');
+  const highlightMixRow = $('highlightMixRow');
+  const fadeModeSelect = $('fadeMode');
+  const fadeStrengthSlider = $('fadeStrength');
+  const fadeStrengthValEl = $('fadeStrengthVal');
+  const fadeEffectSelect = $('fadeEffect');
+  const fadeOnlyNormalCheck = $('fadeOnlyNormal');
+  const paddingSlider = $('padding');
+  const paddingValEl = $('paddingVal');
+  const highlightPaddingSlider = $('highlightPadding');
+  const highlightPaddingValEl = $('highlightPaddingVal');
+  const transparentBg = $('transparentBg');
+  const bgColorInput = $('bgColor');
+  const outputScaleSlider = $('outputScale');
+  const scaleValEl = $('scaleVal');
+  const previewCanvas = $('previewCanvas');
+  const sourceCanvas = $('sourceCanvas');
+  const statusText = $('statusText');
+  const normalColorsEl = $('normalColors');
+  const highlightColorsEl = $('highlightColors');
 
-
-  // ---- Show/hide mix ratio rows ----
-  function updateMixRowVisibility() {
+  // ---- Mix row visibility ----
+  function updateMixVis() {
     normalMixRow.style.display = normalShapeSelect.value === 'mixed' ? '' : 'none';
     highlightMixRow.style.display = highlightShapeSelect.value === 'mixed' ? '' : 'none';
   }
-  normalShapeSelect.addEventListener('change', updateMixRowVisibility);
-  highlightShapeSelect.addEventListener('change', updateMixRowVisibility);
-  updateMixRowVisibility();
+  normalShapeSelect.addEventListener('change', updateMixVis);
+  highlightShapeSelect.addEventListener('change', updateMixVis);
+  updateMixVis();
 
-  // ---- Color palette UI ----
-  // Use a fresh <input type="color"> each time to avoid stale onchange issues
-  function openColorPicker(initialColor, callback) {
-    const picker = document.createElement('input');
-    picker.type = 'color';
-    picker.style.position = 'absolute';
-    picker.style.left = '-9999px';
-    picker.value = initialColor;
-    document.body.appendChild(picker);
-    picker.addEventListener('input', function handler() {
-      callback(picker.value);
-      picker.removeEventListener('input', handler);
-      picker.remove();
-    });
-    picker.click();
+  // ---- Color picker ----
+  function openColorPicker(initial, cb) {
+    const p = document.createElement('input');
+    p.type = 'color';
+    p.style.cssText = 'position:absolute;left:-9999px';
+    p.value = initial;
+    document.body.appendChild(p);
+    p.addEventListener('input', function h() { cb(p.value); p.removeEventListener('input', h); p.remove(); });
+    p.click();
   }
 
   function renderColorList(container, colors) {
@@ -561,148 +502,166 @@
       chip.className = 'color-chip';
       chip.style.background = c;
       chip.title = c;
-
       const rm = document.createElement('span');
       rm.className = 'remove';
       rm.textContent = '\u00d7';
-      rm.addEventListener('click', (e) => {
-        e.stopPropagation();
-        colors.splice(i, 1);
-        renderColorList(container, colors);
-      });
+      rm.addEventListener('click', e => { e.stopPropagation(); colors.splice(i, 1); renderColorList(container, colors); });
       chip.appendChild(rm);
-
-      chip.addEventListener('click', () => {
-        openColorPicker(c, (newColor) => {
-          colors[i] = newColor;
-          renderColorList(container, colors);
-        });
-      });
+      chip.addEventListener('click', () => openColorPicker(c, v => { colors[i] = v; renderColorList(container, colors); }));
       container.appendChild(chip);
     });
-
-    const addBtn = document.createElement('button');
-    addBtn.className = 'add-color-btn';
-    addBtn.textContent = '+';
-    addBtn.addEventListener('click', () => {
-      openColorPicker('#b9cf3d', (newColor) => {
-        colors.push(newColor);
-        renderColorList(container, colors);
-      });
-    });
-    container.appendChild(addBtn);
+    const add = document.createElement('button');
+    add.className = 'add-color-btn';
+    add.textContent = '+';
+    add.addEventListener('click', () => openColorPicker('#b9cf3d', v => { colors.push(v); renderColorList(container, colors); }));
+    container.appendChild(add);
   }
-
   renderColorList(normalColorsEl, normalColorList);
   renderColorList(highlightColorsEl, highlightColorList);
 
-  // ---- Slider value displays ----
-  function bindSlider(slider, display) {
-    slider.addEventListener('input', () => { display.textContent = slider.value; });
-  }
-  bindSlider(fontSizeSlider, fontSizeVal);
-  bindSlider(thresholdSlider, thresholdVal);
-  bindSlider(paddingSlider, paddingVal);
-  bindSlider(highlightPaddingSlider, highlightPaddingVal);
-  bindSlider(outputScaleSlider, scaleVal);
+  // ---- Slider bindings ----
+  function bindSlider(s, d) { s.addEventListener('input', () => d.textContent = s.value); }
+  bindSlider(imgScaleSlider, imgScaleVal);
+  bindSlider(textSizeSlider, textSizeVal);
+  bindSlider(thresholdSlider, thresholdValEl);
+  bindSlider(paddingSlider, paddingValEl);
+  bindSlider(highlightPaddingSlider, highlightPaddingValEl);
+  bindSlider(outputScaleSlider, scaleValEl);
   bindSlider(normalMixSlider, normalMixValEl);
   bindSlider(highlightMixSlider, highlightMixValEl);
   bindSlider(fadeStrengthSlider, fadeStrengthValEl);
 
-  // ---- Lock aspect ratio: auto-compute rows when cols change (or vice versa) ----
+  // ---- Aspect ratio lock ----
   function getSourceAspect() {
-    if (!sourceImage) return 2; // default wide-ish
+    if (!sourceImage) return 2;
     return sourceImage.width / sourceImage.height;
   }
   resColsInput.addEventListener('change', () => {
-    if (lockAspectCheck.checked) {
-      const aspect = getSourceAspect();
-      // For hex grids with offset rows, row height ~= col width * (sqrt(3)/2)
-      // So visual aspect ≈ cols * colStep / (rows * rowStep)
-      // Approximate: rows ≈ cols / aspect * 0.86 (hex height correction)
-      const cols = parseInt(resColsInput.value) || 20;
-      resRowsInput.value = Math.max(3, Math.round(cols / aspect * 0.86));
-    }
+    if (!lockAspectCheck.checked) return;
+    const cols = parseInt(resColsInput.value) || 20;
+    resRowsInput.value = Math.max(3, Math.round(cols / getSourceAspect() * 0.86));
   });
   resRowsInput.addEventListener('change', () => {
-    if (lockAspectCheck.checked) {
-      const aspect = getSourceAspect();
-      const rows = parseInt(resRowsInput.value) || 20;
-      resColsInput.value = Math.max(3, Math.round(rows * aspect / 0.86));
-    }
+    if (!lockAspectCheck.checked) return;
+    const rows = parseInt(resRowsInput.value) || 20;
+    resColsInput.value = Math.max(3, Math.round(rows * getSourceAspect() / 0.86));
   });
 
-  // ---- Input handling ----
-  btnUpload.addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', (e) => {
+  // ---- Image upload ----
+  $('btnUpload').addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', e => {
     const file = e.target.files[0];
     if (!file) return;
-    inputMode = 'image';
     const img = new Image();
     img.onload = () => {
-      sourceCanvas.width = img.width;
-      sourceCanvas.height = img.height;
-      const ctx = sourceCanvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      sourceImage = ctx.getImageData(0, 0, img.width, img.height);
-      statusText.textContent = 'Image loaded: ' + img.width + 'x' + img.height;
-      // Auto-adjust rows if aspect locked
-      if (lockAspectCheck.checked) {
-        const cols = parseInt(resColsInput.value) || 40;
-        const aspect = img.width / img.height;
-        resRowsInput.value = Math.max(3, Math.round(cols / aspect * 0.86));
-      }
+      uploadedImg = img;
+      imageControls.style.display = '';
+      imgOffXInput.value = 0;
+      imgOffYInput.value = 0;
+      imgScaleSlider.value = 100;
+      imgScaleVal.textContent = '100';
+      buildSource();
       generate();
     };
     img.src = URL.createObjectURL(file);
   });
-
-  btnUseText.addEventListener('click', () => {
-    inputMode = 'text';
-    renderTextSource();
+  $('btnClearImage').addEventListener('click', () => {
+    uploadedImg = null;
+    imageControls.style.display = 'none';
+    buildSource();
     generate();
   });
 
-  function renderTextSource() {
-    const text = textInput.value || 'HELLO';
-    const fontSize = parseInt(fontSizeSlider.value);
-    const font = fontSelect.value;
+  // ---- Build composite source from layers ----
+  // Internal working resolution for compositing
+  const WORK_W = 800;
+  const WORK_H = 600;
+
+  function buildSource() {
     const ctx = sourceCanvas.getContext('2d');
+    sourceCanvas.width = WORK_W;
+    sourceCanvas.height = WORK_H;
 
-    ctx.font = fontSize + 'px "' + font + '"';
-    const lines = text.split('\n');
-    const lineHeight = fontSize * 1.2;
-    let maxWidth = 0;
-    lines.forEach(line => {
-      const m = ctx.measureText(line);
-      if (m.width > maxWidth) maxWidth = m.width;
-    });
-
-    const pad = fontSize * 0.3;
-    const w = Math.ceil(maxWidth + pad * 2);
-    const h = Math.ceil(lines.length * lineHeight + pad * 2);
-    sourceCanvas.width = w;
-    sourceCanvas.height = h;
-
+    // White background (non-highlighted)
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = '#000000';
-    ctx.font = fontSize + 'px "' + font + '"';
-    ctx.textBaseline = 'top';
-    lines.forEach((line, i) => {
-      ctx.fillText(line, pad, pad + i * lineHeight);
-    });
+    ctx.fillRect(0, 0, WORK_W, WORK_H);
 
-    sourceImage = ctx.getImageData(0, 0, w, h);
-    statusText.textContent = 'Text rendered: ' + w + 'x' + h;
+    // Draw image layer
+    if (uploadedImg) {
+      const s = parseInt(imgScaleSlider.value) / 100;
+      const ox = parseInt(imgOffXInput.value) || 0;
+      const oy = parseInt(imgOffYInput.value) || 0;
+      const dw = uploadedImg.width * s;
+      const dh = uploadedImg.height * s;
+      // Center the image by default, then apply offset
+      const cx = (WORK_W - dw) / 2 + ox;
+      const cy = (WORK_H - dh) / 2 + oy;
+      ctx.drawImage(uploadedImg, cx, cy, dw, dh);
+    }
 
-    // Auto-adjust rows
+    // Draw text layer
+    if (textLayerEnabled.checked) {
+      const text = textLayerInput.value;
+      if (text) {
+        const fontSize = parseInt(textSizeSlider.value);
+        const font = textFontSelect.value;
+        const tx = parseInt(textOffXInput.value) || 0;
+        const ty = parseInt(textOffYInput.value) || 0;
+        ctx.fillStyle = '#000000';
+        ctx.font = fontSize + 'px "' + font + '"';
+        ctx.textBaseline = 'top';
+        const lines = text.split('\n');
+        const lineH = fontSize * 1.2;
+        // Measure for centering
+        let maxW = 0;
+        lines.forEach(l => { const m = ctx.measureText(l).width; if (m > maxW) maxW = m; });
+        const totalH = lines.length * lineH;
+        const startX = (WORK_W - maxW) / 2 + tx;
+        const startY = (WORK_H - totalH) / 2 + ty;
+        lines.forEach((l, i) => ctx.fillText(l, startX, startY + i * lineH));
+      }
+    }
+
+    sourceImage = ctx.getImageData(0, 0, WORK_W, WORK_H);
+
+    // Auto-adjust rows if locked
     if (lockAspectCheck.checked) {
       const cols = parseInt(resColsInput.value) || 40;
-      const aspect = w / h;
-      resRowsInput.value = Math.max(3, Math.round(cols / aspect * 0.86));
+      resRowsInput.value = Math.max(3, Math.round(cols / (WORK_W / WORK_H) * 0.86));
     }
   }
+
+  // ---- Drag to move image on preview canvas ----
+  let dragging = false;
+  let dragStartX = 0, dragStartY = 0;
+  let dragOrigOX = 0, dragOrigOY = 0;
+
+  previewCanvas.addEventListener('mousedown', e => {
+    if (!uploadedImg) return;
+    dragging = true;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    dragOrigOX = parseInt(imgOffXInput.value) || 0;
+    dragOrigOY = parseInt(imgOffYInput.value) || 0;
+  });
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    // Map pixel drag to source coordinate offset.
+    // The preview canvas is displayed scaled, so compute the ratio.
+    const rect = previewCanvas.getBoundingClientRect();
+    const displayScale = previewCanvas.width / rect.width;
+    // Further scale: the source WORK_W maps to the output canvas width
+    // Output canvas width = cols * hStep + ..., source = WORK_W
+    // Approximate: moving 1 display pixel = displayScale * (WORK_W / canvasWidth) source pixels
+    const srcScale = WORK_W / previewCanvas.width;
+    const dx = (e.clientX - dragStartX) * displayScale * srcScale;
+    const dy = (e.clientY - dragStartY) * displayScale * srcScale;
+    imgOffXInput.value = Math.round(dragOrigOX + dx);
+    imgOffYInput.value = Math.round(dragOrigOY + dy);
+    buildSource();
+    debouncedGenerate();
+  });
+  window.addEventListener('mouseup', () => { dragging = false; });
 
   // ---- Sampling ----
   function isHighlighted(imgData, x, y, threshold, invert) {
@@ -710,10 +669,7 @@
     const ix = Math.floor(x);
     const iy = Math.floor(y);
     const idx = (iy * imgData.width + ix) * 4;
-    const r = imgData.data[idx];
-    const g = imgData.data[idx + 1];
-    const b = imgData.data[idx + 2];
-    const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+    const gray = 0.299 * imgData.data[idx] + 0.587 * imgData.data[idx + 1] + 0.114 * imgData.data[idx + 2];
     const dark = gray < threshold;
     return invert ? !dark : dark;
   }
@@ -726,13 +682,22 @@
     return (seed - 1) / 2147483646;
   }
 
-  // ---- Main generation (async because SVG stamps load as images) ----
+  // ---- Deterministic spatial hash for fade dithering ----
+  // Returns a stable 0..1 value for each grid cell, used instead of random
+  // so fade removal is consistent and complete at the edges.
+  function spatialHash(col, row) {
+    // Large primes for mixing
+    let h = col * 374761393 + row * 668265263;
+    h = (h ^ (h >>> 13)) * 1274126177;
+    h = h ^ (h >>> 16);
+    return (h & 0x7fffffff) / 0x7fffffff;
+  }
+
+  // ---- Main generation ----
   async function generate(exportScale) {
     if (generating) return;
-    if (!sourceImage) {
-      if (inputMode === 'text') renderTextSource();
-      if (!sourceImage) return;
-    }
+    if (!sourceImage) buildSource();
+    if (!sourceImage) return;
 
     generating = true;
     statusText.textContent = 'Generating...';
@@ -755,70 +720,41 @@
     const isTransparent = transparentBg.checked;
     const bgColor = bgColorInput.value;
 
-    // Collect all unique colors we need stamps for
     const allColors = [...new Set([...normalColorList, ...highlightColorList])];
-    const normalTypesNeeded = normalShapeSetting === 'mixed' ? ['filled', 'hollow'] :
-                              normalShapeSetting === 'filled' ? ['filled'] : ['hollow'];
-    const hlTypesNeeded = highlightShapeSetting === 'mixed' ? ['filled', 'hollow'] :
-                          highlightShapeSetting === 'filled' ? ['filled'] : ['hollow'];
-    const typesNeeded = [...new Set([...normalTypesNeeded, ...hlTypesNeeded])];
+    const normalTypes = normalShapeSetting === 'mixed' ? ['filled', 'hollow'] :
+                        normalShapeSetting === 'filled' ? ['filled'] : ['hollow'];
+    const hlTypes = highlightShapeSetting === 'mixed' ? ['filled', 'hollow'] :
+                    highlightShapeSetting === 'filled' ? ['filled'] : ['hollow'];
+    const typesNeeded = [...new Set([...normalTypes, ...hlTypes])];
 
-    // Compute hex cell dimensions.
-    // Hexagons are pointy-top (like the SVGs which are taller than wide).
-    // For a pointy-top hex: width = sqrt(3) * r, height = 2 * r
-    // We'll define the cell based on the grid: each cell is cellW x cellH.
-    // We want 'cols' hexagons across and 'rows' hexagons down.
-
-    // For pointy-top hex tiling:
-    //   horizontal step = cellW + padding
-    //   vertical step   = cellH * 0.75 + padding  (because rows interlock at 3/4 height)
-    //   odd rows are offset by half a horizontal step
-
-    // We pick a base cell height and compute width from the SVG aspect ratio.
-    // Use a reference aspect from the filled SVG (most common).
-    const refAspect = FILLED_ASPECT; // w/h
-    // Solve for cellH such that the grid fits nicely:
-    //   totalWidth  = cols * (cellW + padding) + cellW/2   (for offset)
-    //   totalHeight = rows * (cellH * 0.75 + padding) + cellH * 0.25
-    // We want output to be reasonable, so pick cellH based on a target output width
-    // Target: ~1200px wide at scale=1
+    const refAspect = FILLED_ASPECT;
     const targetWidth = 1200;
-    // cellW = cellH * refAspect
-    // targetWidth ≈ cols * (cellH * refAspect + padding) + (cellH * refAspect)/2
-    // Solve for cellH:
     const cellH = Math.max(4, Math.round(
       (targetWidth - cols * padding) / (cols * refAspect + refAspect / 2)
     ));
     const cellW = Math.max(4, Math.round(cellH * refAspect));
-
     const hStep = cellW + padding;
     const vStep = Math.round(cellH * 0.75) + padding;
-
     const outW = Math.ceil(cols * hStep + cellW / 2 + padding);
     const outH = Math.ceil(rows * vStep + cellH * 0.25 + padding);
 
-    // Preload all SVG stamps at the needed cell size (and highlight size)
     const hlCellH = Math.max(4, cellH - highlightPadding);
     const hlCellW = Math.max(4, Math.round(hlCellH * refAspect));
-
     const stampW = Math.round(cellW * scale);
     const stampH = Math.round(cellH * scale);
     const hlStampW = Math.round(hlCellW * scale);
     const hlStampH = Math.round(hlCellH * scale);
 
-    // Preload normal-size and highlight-size stamps
     const normalStamps = await preloadStamps(typesNeeded, allColors, stampW, stampH);
     const hlStamps = (highlightPadding > 0)
       ? await preloadStamps(typesNeeded, allColors, hlStampW, hlStampH)
       : normalStamps;
 
-    // Set up output canvas
     const canvas = (scale === 1) ? previewCanvas : document.createElement('canvas');
     canvas.width = outW * scale;
     canvas.height = outH * scale;
     const ctx = canvas.getContext('2d');
 
-    // Background
     if (!isTransparent) {
       ctx.fillStyle = bgColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -826,83 +762,61 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Source image sampling scale
     const srcW = sourceImage.width;
     const srcH = sourceImage.height;
 
-    // --- Pre-compute highlight grid and content distance map ---
-    // Build a grid of which cells are highlighted (needed for content-based fade)
+    // Pre-compute highlight grid
     const hlGrid = new Uint8Array(cols * rows);
-    for (let row = 0; row < rows; row++) {
-      for (let col = 0; col < cols; col++) {
-        const x = col * hStep + (row % 2 === 1 ? hStep / 2 : 0);
-        const y = row * vStep;
-        const centerX = x + cellW / 2;
-        const centerY = y + cellH / 2;
-        const srcX = (centerX / (cols * hStep)) * srcW;
-        const srcY = (centerY / (rows * vStep)) * srcH;
-        hlGrid[row * cols + col] = isHighlighted(sourceImage, srcX, srcY, threshold, invert) ? 1 : 0;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const x = c * hStep + (r % 2 === 1 ? hStep / 2 : 0);
+        const y = r * vStep;
+        const sx = ((x + cellW / 2) / (cols * hStep)) * srcW;
+        const sy = ((y + cellH / 2) / (rows * vStep)) * srcH;
+        hlGrid[r * cols + c] = isHighlighted(sourceImage, sx, sy, threshold, invert) ? 1 : 0;
       }
     }
 
-    // For "content" fade mode: BFS from all highlighted cells to compute
-    // distance (in grid steps) from each cell to nearest highlighted cell.
+    // Content-distance BFS
     let distMap = null;
     let maxDist = 1;
     if (fadeMode === 'content' && fadeStrength > 0) {
-      distMap = new Float32Array(cols * rows);
-      distMap.fill(-1);
+      distMap = new Float32Array(cols * rows).fill(-1);
       const queue = [];
-      // Seed BFS with all highlighted cells (distance = 0)
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          if (hlGrid[r * cols + c]) {
-            distMap[r * cols + c] = 0;
-            queue.push(r * cols + c);
-          }
-        }
+      for (let i = 0; i < hlGrid.length; i++) {
+        if (hlGrid[i]) { distMap[i] = 0; queue.push(i); }
       }
-      // BFS using hex grid neighbors (pointy-top, odd rows offset right)
       let qi = 0;
       while (qi < queue.length) {
         const idx = queue[qi++];
-        const r = Math.floor(idx / cols);
-        const c = idx % cols;
-        const d = distMap[idx];
-        // 6 hex neighbors depending on row parity
-        const isOdd = r % 2 === 1;
-        const neighbors = [
-          [r, c - 1], [r, c + 1],                             // left, right
-          [r - 1, isOdd ? c : c - 1], [r - 1, isOdd ? c + 1 : c], // top-left, top-right
-          [r + 1, isOdd ? c : c - 1], [r + 1, isOdd ? c + 1 : c], // bot-left, bot-right
+        const r = Math.floor(idx / cols), c = idx % cols, d = distMap[idx];
+        const odd = r % 2 === 1;
+        const nb = [
+          [r, c-1], [r, c+1],
+          [r-1, odd ? c : c-1], [r-1, odd ? c+1 : c],
+          [r+1, odd ? c : c-1], [r+1, odd ? c+1 : c],
         ];
-        for (const [nr, nc] of neighbors) {
+        for (const [nr, nc] of nb) {
           if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
           const ni = nr * cols + nc;
-          if (distMap[ni] < 0) {
-            distMap[ni] = d + 1;
-            queue.push(ni);
-          }
+          if (distMap[ni] < 0) { distMap[ni] = d + 1; queue.push(ni); }
         }
       }
-      // Find max distance for normalization
       for (let i = 0; i < distMap.length; i++) {
         if (distMap[i] > maxDist) maxDist = distMap[i];
       }
     }
 
-    // Fade calculation: returns a value 0..1 where 1 = fully visible, 0 = fully faded
+    // Fade: returns 0..1 (1=visible, 0=gone)
     function calcFade(col, row, isHL) {
       if (fadeMode === 'none' || fadeStrength === 0) return 1;
-      if (fadeOnlyNormal && isHL) return 1; // never fade highlighted cells
-
-      let t; // raw distance toward fade, 0 = no fade, 1 = deepest fade
-
+      if (fadeOnlyNormal && isHL) return 1;
+      let t;
       if (fadeMode === 'content') {
-        if (isHL) return 1; // highlighted cells are always fully visible in content mode
+        if (isHL) return 1;
         const d = distMap[row * cols + col];
-        if (d <= 0) return 1; // is highlighted or adjacent
-        t = d / maxDist; // normalize 0..1
+        if (d <= 0) return 1;
+        t = d / maxDist;
       } else {
         const nx = cols > 1 ? col / (cols - 1) : 0.5;
         const ny = rows > 1 ? row / (rows - 1) : 0.5;
@@ -917,20 +831,15 @@
             break;
           }
           case 'edges': {
-            const ex = Math.min(nx, 1 - nx);
-            const ey = Math.min(ny, 1 - ny);
-            t = 1 - Math.min(ex, ey) * 2;
+            t = 1 - Math.min(Math.min(nx, 1 - nx), Math.min(ny, 1 - ny)) * 2;
             break;
           }
           default: return 1;
         }
       }
-      // Apply strength: fadeStrength controls how far the fade reaches
-      // At 100% strength, fade covers the full range. At lower values, only
-      // the outermost portion fades.
       const fadeStart = 1 - fadeStrength;
       if (t <= fadeStart) return 1;
-      return 1 - (t - fadeStart) / (1 - fadeStart);
+      return Math.max(0, 1 - (t - fadeStart) / (1 - fadeStart));
     }
 
     resetSeed();
@@ -939,15 +848,12 @@
       for (let col = 0; col < cols; col++) {
         const x = col * hStep + (row % 2 === 1 ? hStep / 2 : 0);
         const y = row * vStep;
-
         const highlighted = !!hlGrid[row * cols + col];
 
-        // Pick color
         const colorPool = highlighted ? highlightColorList : normalColorList;
         if (colorPool.length === 0) { seededRandom(); continue; }
         const color = colorPool[Math.floor(seededRandom() * colorPool.length)];
 
-        // Pick shape type (separate settings for normal vs highlight)
         let shapeType;
         if (highlighted) {
           if (highlightShapeSetting === 'filled') shapeType = 'filled';
@@ -959,26 +865,22 @@
           else shapeType = seededRandom() < normalMixRatio ? 'filled' : 'hollow';
         }
 
-        // Calculate fade
         const fade = calcFade(col, row, highlighted);
-
-        // Apply fade effect
         if (fade <= 0) continue;
+
+        // Deterministic skip: use spatial hash so edges are cleanly removed
         if (fadeEffect === 'skip' && fade < 1) {
-          if (seededRandom() > fade) continue;
+          if (spatialHash(col, row) > fade) continue;
         }
 
-        // Get the stamp
         const useHL = highlighted && highlightPadding > 0;
         const stampMap = useHL ? hlStamps : normalStamps;
         const stamp = stampMap.get(shapeType + '|' + color);
         if (!stamp) continue;
 
-        // Draw stamp centered in the cell
         let sw = useHL ? hlStampW : stampW;
         let sh = useHL ? hlStampH : stampH;
 
-        // Apply shrink fade
         if (fadeEffect === 'shrink' && fade < 1) {
           sw = Math.round(sw * fade);
           sh = Math.round(sh * fade);
@@ -988,15 +890,9 @@
         const dx = x * scale + (stampW - sw) / 2;
         const dy = y * scale + (stampH - sh) / 2;
 
-        if (fadeEffect === 'opacity' && fade < 1) {
-          ctx.globalAlpha = fade;
-        }
-
+        if (fadeEffect === 'opacity' && fade < 1) ctx.globalAlpha = fade;
         ctx.drawImage(stamp, dx, dy, sw, sh);
-
-        if (fadeEffect === 'opacity' && fade < 1) {
-          ctx.globalAlpha = 1;
-        }
+        if (fadeEffect === 'opacity' && fade < 1) ctx.globalAlpha = 1;
       }
     }
 
@@ -1005,55 +901,59 @@
     return canvas;
   }
 
-  // ---- Auto-generate on control changes ----
+  // ---- Auto-generate ----
   let debounceTimer = null;
   function debouncedGenerate() {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => generate(), 100);
+    debounceTimer = setTimeout(() => generate(), 80);
+  }
+  function rebuildAndGenerate() {
+    buildSource();
+    debouncedGenerate();
   }
 
-  const autoGenControls = [
-    thresholdSlider, invertInput,
-    normalShapeSelect, normalMixSlider, highlightShapeSelect, highlightMixSlider,
-    paddingSlider, highlightPaddingSlider, transparentBg, bgColorInput,
-    resColsInput, resRowsInput,
-    fadeModeSelect, fadeStrengthSlider, fadeEffectSelect, fadeOnlyNormalCheck
-  ];
-  autoGenControls.forEach(el => {
+  // Controls that need source rebuild
+  [imgScaleSlider, imgOffXInput, imgOffYInput,
+   textLayerEnabled, textLayerInput, textOffXInput, textOffYInput,
+   textSizeSlider, textFontSelect
+  ].forEach(el => {
+    el.addEventListener('input', rebuildAndGenerate);
+    el.addEventListener('change', rebuildAndGenerate);
+  });
+
+  // Controls that only need re-render
+  [thresholdSlider, invertInput,
+   normalShapeSelect, normalMixSlider, highlightShapeSelect, highlightMixSlider,
+   paddingSlider, highlightPaddingSlider, transparentBg, bgColorInput,
+   resColsInput, resRowsInput,
+   fadeModeSelect, fadeStrengthSlider, fadeEffectSelect, fadeOnlyNormalCheck
+  ].forEach(el => {
     el.addEventListener('input', debouncedGenerate);
     el.addEventListener('change', debouncedGenerate);
   });
 
-  btnGenerate.addEventListener('click', () => {
-    stampCache.clear(); // force re-render SVGs
-    if (inputMode === 'text') renderTextSource();
+  $('btnGenerate').addEventListener('click', () => {
+    stampCache.clear();
+    buildSource();
     generate();
   });
 
   // ---- Export ----
-  btnExport.addEventListener('click', async () => {
-    if (!sourceImage) {
-      if (inputMode === 'text') renderTextSource();
-      if (!sourceImage) return;
-    }
+  $('btnExport').addEventListener('click', async () => {
+    buildSource();
     const scale = parseInt(outputScaleSlider.value);
-    stampCache.clear(); // clear to render at export scale
+    stampCache.clear();
     const exportCanvas = await generate(scale);
     const link = document.createElement('a');
     link.download = 'polygon-art.png';
     link.href = (scale === 1 ? previewCanvas : exportCanvas).toDataURL('image/png');
     link.click();
     statusText.textContent = 'Exported at ' + scale + 'x scale';
-    // Re-render preview at 1x
-    if (scale !== 1) {
-      stampCache.clear();
-      generate();
-    }
+    if (scale !== 1) { stampCache.clear(); generate(); }
   });
 
   // ---- Initial render ----
-  inputMode = 'text';
-  renderTextSource();
+  buildSource();
   generate();
 })();
 </script>
