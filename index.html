@@ -17,8 +17,8 @@
 
   /* --- Sidebar --- */
   .sidebar {
-    width: 320px;
-    min-width: 320px;
+    width: 340px;
+    min-width: 340px;
     background: #242424;
     border-right: 1px solid #333;
     overflow-y: auto;
@@ -64,6 +64,15 @@
     color: #e0e0e0;
     font-size: 14px;
     resize: vertical;
+  }
+  input[type="number"] {
+    width: 70px;
+    padding: 4px 6px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background: #1a1a1a;
+    color: #e0e0e0;
+    font-size: 13px;
   }
   textarea { min-height: 60px; }
   input[type="file"] { display: none; }
@@ -154,6 +163,7 @@
     background: #1a1a1a;
     color: #e0e0e0;
     font-size: 13px;
+    margin-bottom: 6px;
   }
 
   .checkbox-row {
@@ -165,6 +175,15 @@
   .checkbox-row input[type="checkbox"] {
     accent-color: #b9cf3d;
   }
+
+  .inline-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .inline-row label { margin: 0; white-space: nowrap; }
+  .inline-row .x-sep { color: #666; font-size: 14px; }
 
   /* --- Main area --- */
   .main {
@@ -243,17 +262,34 @@
     </div>
   </div>
 
+  <!-- Resolution -->
+  <div class="section">
+    <h2>Resolution (polygon grid)</h2>
+    <div class="inline-row">
+      <label>Columns:</label>
+      <input type="number" id="resCols" value="40" min="3" max="500">
+      <span class="x-sep">x</span>
+      <label>Rows:</label>
+      <input type="number" id="resRows" value="20" min="3" max="500">
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="lockAspect" checked>
+      <label for="lockAspect" style="margin:0;">Lock aspect ratio to input</label>
+    </div>
+  </div>
+
   <!-- Polygon settings -->
   <div class="section">
     <h2>Polygon Shape</h2>
-    <label for="polyShape">Shape:</label>
+    <label for="polyShape">Shape mix:</label>
     <select id="polyShape">
-      <option value="hollow">Hollow hexagon (hohl)</option>
-      <option value="filled" selected>Filled hexagon (Frenzelit)</option>
+      <option value="filled">Filled only (Frenzelit)</option>
+      <option value="hollow">Hollow only (hohl)</option>
+      <option value="mixed" selected>Mixed filled + hollow</option>
     </select>
-    <div class="range-row" style="margin-top:10px;">
-      <label>Polygon size: <span class="range-value" id="polySizeVal">24</span>px</label>
-      <input type="range" id="polySize" min="6" max="80" value="24">
+    <div class="range-row" style="margin-top:8px;" id="mixRatioRow">
+      <label>Filled ratio: <span class="range-value" id="mixRatioVal">50</span>%</label>
+      <input type="range" id="mixRatio" min="0" max="100" value="50">
     </div>
   </div>
 
@@ -323,50 +359,88 @@
 
 <script>
 (function() {
-  // ---- Polygon geometry ----
-  // Flat-top regular hexagon unit points (radius=1, centered at 0,0)
-  function hexPoints(cx, cy, r) {
-    const pts = [];
-    for (let i = 0; i < 6; i++) {
-      const angle = Math.PI / 180 * (60 * i);
-      pts.push([cx + r * Math.cos(angle), cy + r * Math.sin(angle)]);
-    }
-    return pts;
+  // =====================================================
+  // Embedded SVG polygon data from the repository files.
+  // We build Image objects from these SVGs at runtime so
+  // each polygon stamp is the *actual* repo artwork.
+  // =====================================================
+
+  // Hollow hexagon (hohl_polygon.svg) - viewBox 0 0 403 459.9298
+  const HOLLOW_SVG_TEMPLATE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 403 459.9298">
+  <defs><style>.c{fill:none;stroke:{{COLOR}};stroke-linecap:round;stroke-linejoin:round;stroke-width:35px;}</style></defs>
+  <polygon class="c" points="385.5 336.19735 385.5 123.73245 201.5 17.5 17.5 123.73245 17.5 336.19735 201.5 442.4298 385.5 336.19735"/>
+</svg>`;
+
+  // Filled hexagon (Frenzelit_Polygon_Flaeche) - viewBox 0 0 763.24 856.81
+  const FILLED_SVG_TEMPLATE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 763.24 856.81">
+  <defs><style>.c{fill:{{COLOR}};stroke:{{COLOR}};stroke-miterlimit:10;stroke-width:74px;}</style></defs>
+  <path class="c" d="M374.2,39.66L47.34,225.23c-6.39,3.63-10.34,10.41-10.34,17.75v368.22c0,7.3,3.9,14.05,10.23,17.69l326.93,188.18c6.34,3.65,14.16,3.63,20.48-.06l321.48-187.75c6.27-3.66,10.12-10.37,10.12-17.63V245.3c0-7.26-3.85-13.97-10.12-17.63L394.58,39.79c-6.28-3.67-14.05-3.72-20.38-.13Z"/>
+</svg>`;
+
+  // Aspect ratios from the SVG viewBoxes
+  const HOLLOW_ASPECT = 403 / 459.9298;   // ~0.876 (width/height)
+  const FILLED_ASPECT = 763.24 / 856.81;  // ~0.891
+
+  // ---- SVG stamp cache ----
+  // Key: "filled|#color|width|height" or "hollow|..."  -> offscreen canvas
+  const stampCache = new Map();
+
+  function svgToDataURL(svgString) {
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
   }
 
-  // Filled hexagon path (Frenzelit style - rounded hex with bezier curves)
-  // Derived from the SVG path, normalized to unit coordinates
-  function drawFilledHex(ctx, cx, cy, r) {
-    const pts = hexPoints(cx, cy, r);
-    ctx.beginPath();
-    ctx.moveTo(pts[0][0], pts[0][1]);
-    for (let i = 1; i < 6; i++) {
-      ctx.lineTo(pts[i][0], pts[i][1]);
-    }
-    ctx.closePath();
-    ctx.fill();
+  // Returns a promise that resolves to an offscreen canvas with the polygon drawn
+  function getStamp(type, color, w, h) {
+    const key = type + '|' + color + '|' + w + '|' + h;
+    if (stampCache.has(key)) return Promise.resolve(stampCache.get(key));
+
+    const template = type === 'filled' ? FILLED_SVG_TEMPLATE : HOLLOW_SVG_TEMPLATE;
+    const svgStr = template.replace(/\{\{COLOR\}\}/g, color);
+    const url = svgToDataURL(svgStr);
+
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const c = document.createElement('canvas');
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        stampCache.set(key, c);
+        resolve(c);
+      };
+      img.onerror = () => {
+        // fallback: blank canvas
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        stampCache.set(key, c);
+        resolve(c);
+      };
+      img.src = url;
+    });
   }
 
-  // Hollow hexagon (hohl style - stroke only)
-  function drawHollowHex(ctx, cx, cy, r, lineWidth) {
-    const pts = hexPoints(cx, cy, r);
-    ctx.beginPath();
-    ctx.moveTo(pts[0][0], pts[0][1]);
-    for (let i = 1; i < 6; i++) {
-      ctx.lineTo(pts[i][0], pts[i][1]);
+  // Pre-generate all stamps needed for a render, returns a map
+  async function preloadStamps(types, colors, w, h) {
+    const promises = [];
+    const map = new Map();
+    for (const t of types) {
+      for (const c of colors) {
+        promises.push(getStamp(t, c, w, h).then(stamp => {
+          map.set(t + '|' + c, stamp);
+        }));
+      }
     }
-    ctx.closePath();
-    ctx.lineWidth = lineWidth;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.stroke();
+    await Promise.all(promises);
+    return map;
   }
 
   // ---- State ----
   let normalColorList = ['#b9cf3d', '#b3a7d2', '#2f2b2a'];
   let highlightColorList = ['#b9cf3d', '#ffffff'];
-  let sourceImage = null; // ImageData from uploaded or text-rendered image
-  let inputMode = 'text'; // 'text' or 'image'
+  let sourceImage = null;
+  let inputMode = 'text';
+  let generating = false;
 
   // ---- DOM refs ----
   const fileInput = document.getElementById('fileInput');
@@ -380,8 +454,12 @@
   const thresholdVal = document.getElementById('thresholdVal');
   const invertInput = document.getElementById('invertInput');
   const polyShapeSelect = document.getElementById('polyShape');
-  const polySizeSlider = document.getElementById('polySize');
-  const polySizeVal = document.getElementById('polySizeVal');
+  const mixRatioSlider = document.getElementById('mixRatio');
+  const mixRatioVal = document.getElementById('mixRatioVal');
+  const mixRatioRow = document.getElementById('mixRatioRow');
+  const resColsInput = document.getElementById('resCols');
+  const resRowsInput = document.getElementById('resRows');
+  const lockAspectCheck = document.getElementById('lockAspect');
   const paddingSlider = document.getElementById('padding');
   const paddingVal = document.getElementById('paddingVal');
   const highlightPaddingSlider = document.getElementById('highlightPadding');
@@ -399,8 +477,15 @@
   const highlightColorsEl = document.getElementById('highlightColors');
   const hiddenColorPicker = document.getElementById('hiddenColorPicker');
 
+  // ---- Show/hide mix ratio ----
+  function updateMixRowVisibility() {
+    mixRatioRow.style.display = polyShapeSelect.value === 'mixed' ? '' : 'none';
+  }
+  polyShapeSelect.addEventListener('change', updateMixRowVisibility);
+  updateMixRowVisibility();
+
   // ---- Color palette UI ----
-  function renderColorList(container, colors, listName) {
+  function renderColorList(container, colors) {
     container.innerHTML = '';
     colors.forEach((c, i) => {
       const chip = document.createElement('div');
@@ -414,7 +499,7 @@
       rm.addEventListener('click', (e) => {
         e.stopPropagation();
         colors.splice(i, 1);
-        renderColorList(container, colors, listName);
+        renderColorList(container, colors);
       });
       chip.appendChild(rm);
 
@@ -422,11 +507,10 @@
         hiddenColorPicker.value = c;
         hiddenColorPicker.onchange = () => {
           colors[i] = hiddenColorPicker.value;
-          renderColorList(container, colors, listName);
+          renderColorList(container, colors);
         };
         hiddenColorPicker.click();
       });
-
       container.appendChild(chip);
     });
 
@@ -437,26 +521,49 @@
       hiddenColorPicker.value = '#ffffff';
       hiddenColorPicker.onchange = () => {
         colors.push(hiddenColorPicker.value);
-        renderColorList(container, colors, listName);
+        renderColorList(container, colors);
       };
       hiddenColorPicker.click();
     });
     container.appendChild(addBtn);
   }
 
-  renderColorList(normalColorsEl, normalColorList, 'normal');
-  renderColorList(highlightColorsEl, highlightColorList, 'highlight');
+  renderColorList(normalColorsEl, normalColorList);
+  renderColorList(highlightColorsEl, highlightColorList);
 
   // ---- Slider value displays ----
-  function bindSlider(slider, display, suffix) {
+  function bindSlider(slider, display) {
     slider.addEventListener('input', () => { display.textContent = slider.value; });
   }
   bindSlider(fontSizeSlider, fontSizeVal);
   bindSlider(thresholdSlider, thresholdVal);
-  bindSlider(polySizeSlider, polySizeVal);
   bindSlider(paddingSlider, paddingVal);
   bindSlider(highlightPaddingSlider, highlightPaddingVal);
   bindSlider(outputScaleSlider, scaleVal);
+  bindSlider(mixRatioSlider, mixRatioVal);
+
+  // ---- Lock aspect ratio: auto-compute rows when cols change (or vice versa) ----
+  function getSourceAspect() {
+    if (!sourceImage) return 2; // default wide-ish
+    return sourceImage.width / sourceImage.height;
+  }
+  resColsInput.addEventListener('change', () => {
+    if (lockAspectCheck.checked) {
+      const aspect = getSourceAspect();
+      // For hex grids with offset rows, row height ~= col width * (sqrt(3)/2)
+      // So visual aspect ≈ cols * colStep / (rows * rowStep)
+      // Approximate: rows ≈ cols / aspect * 0.86 (hex height correction)
+      const cols = parseInt(resColsInput.value) || 20;
+      resRowsInput.value = Math.max(3, Math.round(cols / aspect * 0.86));
+    }
+  });
+  resRowsInput.addEventListener('change', () => {
+    if (lockAspectCheck.checked) {
+      const aspect = getSourceAspect();
+      const rows = parseInt(resRowsInput.value) || 20;
+      resColsInput.value = Math.max(3, Math.round(rows * aspect / 0.86));
+    }
+  });
 
   // ---- Input handling ----
   btnUpload.addEventListener('click', () => fileInput.click());
@@ -472,6 +579,12 @@
       ctx.drawImage(img, 0, 0);
       sourceImage = ctx.getImageData(0, 0, img.width, img.height);
       statusText.textContent = 'Image loaded: ' + img.width + 'x' + img.height;
+      // Auto-adjust rows if aspect locked
+      if (lockAspectCheck.checked) {
+        const cols = parseInt(resColsInput.value) || 40;
+        const aspect = img.width / img.height;
+        resRowsInput.value = Math.max(3, Math.round(cols / aspect * 0.86));
+      }
       generate();
     };
     img.src = URL.createObjectURL(file);
@@ -515,6 +628,13 @@
 
     sourceImage = ctx.getImageData(0, 0, w, h);
     statusText.textContent = 'Text rendered: ' + w + 'x' + h;
+
+    // Auto-adjust rows
+    if (lockAspectCheck.checked) {
+      const cols = parseInt(resColsInput.value) || 40;
+      const aspect = w / h;
+      resRowsInput.value = Math.max(3, Math.round(cols / aspect * 0.86));
+    }
   }
 
   // ---- Sampling ----
@@ -531,136 +651,198 @@
     return invert ? !dark : dark;
   }
 
-  // ---- Main generation ----
-  function generate(scale) {
+  // ---- Seeded random ----
+  let seed = 42;
+  function resetSeed() { seed = 42; }
+  function seededRandom() {
+    seed = (seed * 16807) % 2147483647;
+    return (seed - 1) / 2147483646;
+  }
+
+  // ---- Main generation (async because SVG stamps load as images) ----
+  async function generate(exportScale) {
+    if (generating) return;
     if (!sourceImage) {
-      if (inputMode === 'text') {
-        renderTextSource();
-      }
+      if (inputMode === 'text') renderTextSource();
       if (!sourceImage) return;
     }
 
-    scale = scale || 1;
-    const polySize = parseInt(polySizeSlider.value);
+    generating = true;
+    statusText.textContent = 'Generating...';
+    const scale = exportScale || 1;
+
+    const cols = Math.max(3, parseInt(resColsInput.value) || 40);
+    const rows = Math.max(3, parseInt(resRowsInput.value) || 20);
     const padding = parseInt(paddingSlider.value);
     const highlightPadding = parseInt(highlightPaddingSlider.value);
     const threshold = parseInt(thresholdSlider.value);
     const invert = invertInput.checked;
-    const shape = polyShapeSelect.value;
+    const shapeSetting = polyShapeSelect.value;
+    const mixRatio = parseInt(mixRatioSlider.value) / 100; // fraction that are filled
     const isTransparent = transparentBg.checked;
     const bgColor = bgColorInput.value;
 
-    const srcW = sourceImage.width;
-    const srcH = sourceImage.height;
+    // Collect all unique colors we need stamps for
+    const allColors = [...new Set([...normalColorList, ...highlightColorList])];
+    const typesNeeded = shapeSetting === 'mixed' ? ['filled', 'hollow'] :
+                        shapeSetting === 'filled' ? ['filled'] : ['hollow'];
 
-    // Hex grid geometry (flat-top hexagons)
-    const r = polySize; // radius (center to vertex)
-    const hexW = r * 2;                    // width of one hex
-    const hexH = r * Math.sqrt(3);         // height of one hex
-    const colStep = hexW * 0.75 + padding; // horizontal step between columns
-    const rowStep = hexH + padding;        // vertical step between rows
+    // Compute hex cell dimensions.
+    // Hexagons are pointy-top (like the SVGs which are taller than wide).
+    // For a pointy-top hex: width = sqrt(3) * r, height = 2 * r
+    // We'll define the cell based on the grid: each cell is cellW x cellH.
+    // We want 'cols' hexagons across and 'rows' hexagons down.
 
-    // Determine how many columns and rows we need to cover the source image
-    const cols = Math.ceil(srcW / colStep) + 1;
-    const rows = Math.ceil(srcH / (rowStep)) + 2;
+    // For pointy-top hex tiling:
+    //   horizontal step = cellW + padding
+    //   vertical step   = cellH * 0.75 + padding  (because rows interlock at 3/4 height)
+    //   odd rows are offset by half a horizontal step
 
-    // Output canvas size
-    const outW = Math.ceil(cols * colStep + r * 0.5);
-    const outH = Math.ceil(rows * rowStep + hexH * 0.5);
+    // We pick a base cell height and compute width from the SVG aspect ratio.
+    // Use a reference aspect from the filled SVG (most common).
+    const refAspect = FILLED_ASPECT; // w/h
+    // Solve for cellH such that the grid fits nicely:
+    //   totalWidth  = cols * (cellW + padding) + cellW/2   (for offset)
+    //   totalHeight = rows * (cellH * 0.75 + padding) + cellH * 0.25
+    // We want output to be reasonable, so pick cellH based on a target output width
+    // Target: ~1200px wide at scale=1
+    const targetWidth = 1200;
+    // cellW = cellH * refAspect
+    // targetWidth ≈ cols * (cellH * refAspect + padding) + (cellH * refAspect)/2
+    // Solve for cellH:
+    const cellH = Math.max(4, Math.round(
+      (targetWidth - cols * padding) / (cols * refAspect + refAspect / 2)
+    ));
+    const cellW = Math.max(4, Math.round(cellH * refAspect));
 
+    const hStep = cellW + padding;
+    const vStep = Math.round(cellH * 0.75) + padding;
+
+    const outW = Math.ceil(cols * hStep + cellW / 2 + padding);
+    const outH = Math.ceil(rows * vStep + cellH * 0.25 + padding);
+
+    // Preload all SVG stamps at the needed cell size (and highlight size)
+    const hlCellH = Math.max(4, cellH - highlightPadding);
+    const hlCellW = Math.max(4, Math.round(hlCellH * refAspect));
+
+    const stampW = Math.round(cellW * scale);
+    const stampH = Math.round(cellH * scale);
+    const hlStampW = Math.round(hlCellW * scale);
+    const hlStampH = Math.round(hlCellH * scale);
+
+    // Preload normal-size and highlight-size stamps
+    const normalStamps = await preloadStamps(typesNeeded, allColors, stampW, stampH);
+    const hlStamps = (highlightPadding > 0)
+      ? await preloadStamps(typesNeeded, allColors, hlStampW, hlStampH)
+      : normalStamps;
+
+    // Set up output canvas
     const canvas = (scale === 1) ? previewCanvas : document.createElement('canvas');
     canvas.width = outW * scale;
     canvas.height = outH * scale;
     const ctx = canvas.getContext('2d');
 
-    if (scale !== 1) ctx.scale(scale, scale);
-
     // Background
     if (!isTransparent) {
       ctx.fillStyle = bgColor;
-      ctx.fillRect(0, 0, outW, outH);
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Scale factors from output grid back to source image
-    const scaleX = srcW / (cols * colStep);
-    const scaleY = srcH / (rows * rowStep);
+    // Source image sampling scale
+    const srcW = sourceImage.width;
+    const srcH = sourceImage.height;
 
-    // Seeded random for consistent color assignment
-    let seed = 42;
-    function seededRandom() {
-      seed = (seed * 16807 + 0) % 2147483647;
-      return (seed - 1) / 2147483646;
-    }
+    resetSeed();
 
-    const hollowLineWidth = Math.max(1, r * 0.18);
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        // Pointy-top hex position: odd rows offset right by half hStep
+        const x = col * hStep + (row % 2 === 1 ? hStep / 2 : 0);
+        const y = row * vStep;
 
-    for (let col = 0; col < cols; col++) {
-      for (let row = 0; row < rows; row++) {
-        // Hex center position
-        const cx = r + col * colStep;
-        const cy = hexH / 2 + row * rowStep + (col % 2 === 1 ? rowStep / 2 : 0);
-
-        // Map to source image coordinates
-        const srcX = cx * scaleX;
-        const srcY = cy * scaleY;
+        // Map grid center to source image
+        const centerX = x + cellW / 2;
+        const centerY = y + cellH / 2;
+        const srcX = (centerX / (cols * hStep)) * srcW;
+        const srcY = (centerY / (rows * vStep)) * srcH;
 
         const highlighted = isHighlighted(sourceImage, srcX, srcY, threshold, invert);
 
-        // Choose color
+        // Pick color
         const colorPool = highlighted ? highlightColorList : normalColorList;
-        if (colorPool.length === 0) continue;
+        if (colorPool.length === 0) { seededRandom(); continue; }
         const color = colorPool[Math.floor(seededRandom() * colorPool.length)];
 
-        // Calculate effective radius (shrink for padding)
-        const extraPad = highlighted ? highlightPadding : 0;
-        const effectiveR = Math.max(2, r - extraPad / 2);
+        // Pick shape type
+        let shapeType;
+        if (shapeSetting === 'filled') shapeType = 'filled';
+        else if (shapeSetting === 'hollow') shapeType = 'hollow';
+        else shapeType = seededRandom() < mixRatio ? 'filled' : 'hollow';
 
-        ctx.save();
-        if (shape === 'filled') {
-          ctx.fillStyle = color;
-          drawFilledHex(ctx, cx, cy, effectiveR);
-        } else {
-          ctx.strokeStyle = color;
-          drawHollowHex(ctx, cx, cy, effectiveR, hollowLineWidth);
-        }
-        ctx.restore();
+        // Get the stamp
+        const useHL = highlighted && highlightPadding > 0;
+        const stampMap = useHL ? hlStamps : normalStamps;
+        const stamp = stampMap.get(shapeType + '|' + color);
+        if (!stamp) continue;
+
+        // Draw stamp centered in the cell
+        const sw = useHL ? hlStampW : stampW;
+        const sh = useHL ? hlStampH : stampH;
+        const dx = x * scale + (stampW - sw) / 2;
+        const dy = y * scale + (stampH - sh) / 2;
+        ctx.drawImage(stamp, dx, dy, sw, sh);
       }
     }
 
-    if (scale === 1) {
-      statusText.textContent = 'Generated: ' + outW + 'x' + outH + ' (' + cols + 'x' + rows + ' hexagons)';
-    }
+    statusText.textContent = 'Generated: ' + outW + 'x' + outH + ' (' + cols + 'x' + rows + ' polygons)';
+    generating = false;
     return canvas;
   }
 
   // ---- Auto-generate on control changes ----
+  let debounceTimer = null;
+  function debouncedGenerate() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => generate(), 100);
+  }
+
   const autoGenControls = [
-    thresholdSlider, invertInput, polyShapeSelect, polySizeSlider,
-    paddingSlider, highlightPaddingSlider, transparentBg, bgColorInput
+    thresholdSlider, invertInput, polyShapeSelect, mixRatioSlider,
+    paddingSlider, highlightPaddingSlider, transparentBg, bgColorInput,
+    resColsInput, resRowsInput
   ];
   autoGenControls.forEach(el => {
-    el.addEventListener('input', () => generate());
-    el.addEventListener('change', () => generate());
+    el.addEventListener('input', debouncedGenerate);
+    el.addEventListener('change', debouncedGenerate);
   });
 
   btnGenerate.addEventListener('click', () => {
+    stampCache.clear(); // force re-render SVGs
     if (inputMode === 'text') renderTextSource();
     generate();
   });
 
   // ---- Export ----
-  btnExport.addEventListener('click', () => {
+  btnExport.addEventListener('click', async () => {
     if (!sourceImage) {
       if (inputMode === 'text') renderTextSource();
       if (!sourceImage) return;
     }
     const scale = parseInt(outputScaleSlider.value);
-    const exportCanvas = generate(scale);
+    stampCache.clear(); // clear to render at export scale
+    const exportCanvas = await generate(scale);
     const link = document.createElement('a');
     link.download = 'polygon-art.png';
     link.href = (scale === 1 ? previewCanvas : exportCanvas).toDataURL('image/png');
     link.click();
     statusText.textContent = 'Exported at ' + scale + 'x scale';
+    // Re-render preview at 1x
+    if (scale !== 1) {
+      stampCache.clear();
+      generate();
+    }
   });
 
   // ---- Initial render ----
