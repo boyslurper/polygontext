@@ -278,19 +278,59 @@
     </div>
   </div>
 
-  <!-- Polygon settings -->
+  <!-- Polygon shape: normal -->
   <div class="section">
-    <h2>Polygon Shape</h2>
-    <label for="polyShape">Shape mix:</label>
-    <select id="polyShape">
+    <h2>Normal Polygon Shape</h2>
+    <label for="normalShape">Shape:</label>
+    <select id="normalShape">
       <option value="filled">Filled only (Frenzelit)</option>
       <option value="hollow">Hollow only (hohl)</option>
       <option value="mixed" selected>Mixed filled + hollow</option>
     </select>
-    <div class="range-row" style="margin-top:8px;" id="mixRatioRow">
-      <label>Filled ratio: <span class="range-value" id="mixRatioVal">50</span>%</label>
-      <input type="range" id="mixRatio" min="0" max="100" value="50">
+    <div class="range-row" style="margin-top:8px;" id="normalMixRow">
+      <label>Filled ratio: <span class="range-value" id="normalMixVal">50</span>%</label>
+      <input type="range" id="normalMix" min="0" max="100" value="50">
     </div>
+  </div>
+
+  <!-- Polygon shape: highlight -->
+  <div class="section">
+    <h2>Highlight Polygon Shape</h2>
+    <label for="highlightShape">Shape:</label>
+    <select id="highlightShape">
+      <option value="filled" selected>Filled only (Frenzelit)</option>
+      <option value="hollow">Hollow only (hohl)</option>
+      <option value="mixed">Mixed filled + hollow</option>
+    </select>
+    <div class="range-row" style="margin-top:8px;" id="highlightMixRow">
+      <label>Filled ratio: <span class="range-value" id="highlightMixVal">50</span>%</label>
+      <input type="range" id="highlightMix" min="0" max="100" value="50">
+    </div>
+  </div>
+
+  <!-- Fade -->
+  <div class="section">
+    <h2>Pattern Fade</h2>
+    <label for="fadeMode">Fade direction:</label>
+    <select id="fadeMode">
+      <option value="none" selected>None</option>
+      <option value="edges">Edges inward</option>
+      <option value="radial">Radial (center out)</option>
+      <option value="top">Top to bottom</option>
+      <option value="bottom">Bottom to top</option>
+      <option value="left">Left to right</option>
+      <option value="right">Right to left</option>
+    </select>
+    <div class="range-row" style="margin-top:8px;">
+      <label>Fade strength: <span class="range-value" id="fadeStrengthVal">50</span>%</label>
+      <input type="range" id="fadeStrength" min="0" max="100" value="50">
+    </div>
+    <label for="fadeEffect" style="margin-top:4px;">Fade effect:</label>
+    <select id="fadeEffect">
+      <option value="skip" selected>Remove polygons</option>
+      <option value="shrink">Shrink polygons</option>
+      <option value="opacity">Fade opacity</option>
+    </select>
   </div>
 
   <!-- Padding -->
@@ -450,10 +490,18 @@
   const thresholdSlider = document.getElementById('threshold');
   const thresholdVal = document.getElementById('thresholdVal');
   const invertInput = document.getElementById('invertInput');
-  const polyShapeSelect = document.getElementById('polyShape');
-  const mixRatioSlider = document.getElementById('mixRatio');
-  const mixRatioVal = document.getElementById('mixRatioVal');
-  const mixRatioRow = document.getElementById('mixRatioRow');
+  const normalShapeSelect = document.getElementById('normalShape');
+  const normalMixSlider = document.getElementById('normalMix');
+  const normalMixValEl = document.getElementById('normalMixVal');
+  const normalMixRow = document.getElementById('normalMixRow');
+  const highlightShapeSelect = document.getElementById('highlightShape');
+  const highlightMixSlider = document.getElementById('highlightMix');
+  const highlightMixValEl = document.getElementById('highlightMixVal');
+  const highlightMixRow = document.getElementById('highlightMixRow');
+  const fadeModeSelect = document.getElementById('fadeMode');
+  const fadeStrengthSlider = document.getElementById('fadeStrength');
+  const fadeStrengthValEl = document.getElementById('fadeStrengthVal');
+  const fadeEffectSelect = document.getElementById('fadeEffect');
   const resColsInput = document.getElementById('resCols');
   const resRowsInput = document.getElementById('resRows');
   const lockAspectCheck = document.getElementById('lockAspect');
@@ -474,11 +522,13 @@
   const highlightColorsEl = document.getElementById('highlightColors');
 
 
-  // ---- Show/hide mix ratio ----
+  // ---- Show/hide mix ratio rows ----
   function updateMixRowVisibility() {
-    mixRatioRow.style.display = polyShapeSelect.value === 'mixed' ? '' : 'none';
+    normalMixRow.style.display = normalShapeSelect.value === 'mixed' ? '' : 'none';
+    highlightMixRow.style.display = highlightShapeSelect.value === 'mixed' ? '' : 'none';
   }
-  polyShapeSelect.addEventListener('change', updateMixRowVisibility);
+  normalShapeSelect.addEventListener('change', updateMixRowVisibility);
+  highlightShapeSelect.addEventListener('change', updateMixRowVisibility);
   updateMixRowVisibility();
 
   // ---- Color palette UI ----
@@ -549,7 +599,9 @@
   bindSlider(paddingSlider, paddingVal);
   bindSlider(highlightPaddingSlider, highlightPaddingVal);
   bindSlider(outputScaleSlider, scaleVal);
-  bindSlider(mixRatioSlider, mixRatioVal);
+  bindSlider(normalMixSlider, normalMixValEl);
+  bindSlider(highlightMixSlider, highlightMixValEl);
+  bindSlider(fadeStrengthSlider, fadeStrengthValEl);
 
   // ---- Lock aspect ratio: auto-compute rows when cols change (or vice versa) ----
   function getSourceAspect() {
@@ -686,15 +738,23 @@
     const highlightPadding = parseInt(highlightPaddingSlider.value);
     const threshold = parseInt(thresholdSlider.value);
     const invert = invertInput.checked;
-    const shapeSetting = polyShapeSelect.value;
-    const mixRatio = parseInt(mixRatioSlider.value) / 100; // fraction that are filled
+    const normalShapeSetting = normalShapeSelect.value;
+    const highlightShapeSetting = highlightShapeSelect.value;
+    const normalMixRatio = parseInt(normalMixSlider.value) / 100;
+    const highlightMixRatio = parseInt(highlightMixSlider.value) / 100;
+    const fadeMode = fadeModeSelect.value;
+    const fadeStrength = parseInt(fadeStrengthSlider.value) / 100;
+    const fadeEffect = fadeEffectSelect.value;
     const isTransparent = transparentBg.checked;
     const bgColor = bgColorInput.value;
 
     // Collect all unique colors we need stamps for
     const allColors = [...new Set([...normalColorList, ...highlightColorList])];
-    const typesNeeded = shapeSetting === 'mixed' ? ['filled', 'hollow'] :
-                        shapeSetting === 'filled' ? ['filled'] : ['hollow'];
+    const normalTypesNeeded = normalShapeSetting === 'mixed' ? ['filled', 'hollow'] :
+                              normalShapeSetting === 'filled' ? ['filled'] : ['hollow'];
+    const hlTypesNeeded = highlightShapeSetting === 'mixed' ? ['filled', 'hollow'] :
+                          highlightShapeSetting === 'filled' ? ['filled'] : ['hollow'];
+    const typesNeeded = [...new Set([...normalTypesNeeded, ...hlTypesNeeded])];
 
     // Compute hex cell dimensions.
     // Hexagons are pointy-top (like the SVGs which are taller than wide).
@@ -763,6 +823,36 @@
     const srcW = sourceImage.width;
     const srcH = sourceImage.height;
 
+    // Fade calculation: returns a value 0..1 where 1 = fully visible, 0 = fully faded
+    function calcFade(col, row) {
+      if (fadeMode === 'none' || fadeStrength === 0) return 1;
+      const nx = cols > 1 ? col / (cols - 1) : 0.5; // 0..1
+      const ny = rows > 1 ? row / (rows - 1) : 0.5;
+      let t; // raw distance toward fade edge, 0 = no fade, 1 = deepest fade
+      switch (fadeMode) {
+        case 'top':    t = 1 - ny; break;
+        case 'bottom': t = ny; break;
+        case 'left':   t = 1 - nx; break;
+        case 'right':  t = nx; break;
+        case 'radial': {
+          const dx = nx - 0.5, dy = ny - 0.5;
+          t = Math.sqrt(dx * dx + dy * dy) / 0.7071; // normalized to corners
+          break;
+        }
+        case 'edges': {
+          const ex = Math.min(nx, 1 - nx); // distance from nearest horizontal edge
+          const ey = Math.min(ny, 1 - ny); // distance from nearest vertical edge
+          t = 1 - Math.min(ex, ey) * 2;    // 1 at edge, 0 at center
+          break;
+        }
+        default: return 1;
+      }
+      // Apply strength: higher strength means fade starts earlier
+      const fadeStart = 1 - fadeStrength; // below this t, fully visible
+      if (t <= fadeStart) return 1;
+      return 1 - (t - fadeStart) / (1 - fadeStart);
+    }
+
     resetSeed();
 
     for (let row = 0; row < rows; row++) {
@@ -784,11 +874,27 @@
         if (colorPool.length === 0) { seededRandom(); continue; }
         const color = colorPool[Math.floor(seededRandom() * colorPool.length)];
 
-        // Pick shape type
+        // Pick shape type (separate settings for normal vs highlight)
         let shapeType;
-        if (shapeSetting === 'filled') shapeType = 'filled';
-        else if (shapeSetting === 'hollow') shapeType = 'hollow';
-        else shapeType = seededRandom() < mixRatio ? 'filled' : 'hollow';
+        if (highlighted) {
+          if (highlightShapeSetting === 'filled') shapeType = 'filled';
+          else if (highlightShapeSetting === 'hollow') shapeType = 'hollow';
+          else shapeType = seededRandom() < highlightMixRatio ? 'filled' : 'hollow';
+        } else {
+          if (normalShapeSetting === 'filled') shapeType = 'filled';
+          else if (normalShapeSetting === 'hollow') shapeType = 'hollow';
+          else shapeType = seededRandom() < normalMixRatio ? 'filled' : 'hollow';
+        }
+
+        // Calculate fade
+        const fade = calcFade(col, row);
+
+        // Apply fade effect
+        if (fade <= 0) continue; // fully faded out
+        if (fadeEffect === 'skip' && fade < 1) {
+          // Probabilistic removal: lower fade = more likely to skip
+          if (seededRandom() > fade) continue;
+        }
 
         // Get the stamp
         const useHL = highlighted && highlightPadding > 0;
@@ -797,11 +903,29 @@
         if (!stamp) continue;
 
         // Draw stamp centered in the cell
-        const sw = useHL ? hlStampW : stampW;
-        const sh = useHL ? hlStampH : stampH;
+        let sw = useHL ? hlStampW : stampW;
+        let sh = useHL ? hlStampH : stampH;
+
+        // Apply shrink fade
+        if (fadeEffect === 'shrink' && fade < 1) {
+          sw = Math.round(sw * fade);
+          sh = Math.round(sh * fade);
+          if (sw < 1 || sh < 1) continue;
+        }
+
         const dx = x * scale + (stampW - sw) / 2;
         const dy = y * scale + (stampH - sh) / 2;
+
+        // Apply opacity fade
+        if (fadeEffect === 'opacity' && fade < 1) {
+          ctx.globalAlpha = fade;
+        }
+
         ctx.drawImage(stamp, dx, dy, sw, sh);
+
+        if (fadeEffect === 'opacity' && fade < 1) {
+          ctx.globalAlpha = 1;
+        }
       }
     }
 
@@ -818,9 +942,11 @@
   }
 
   const autoGenControls = [
-    thresholdSlider, invertInput, polyShapeSelect, mixRatioSlider,
+    thresholdSlider, invertInput,
+    normalShapeSelect, normalMixSlider, highlightShapeSelect, highlightMixSlider,
     paddingSlider, highlightPaddingSlider, transparentBg, bgColorInput,
-    resColsInput, resRowsInput
+    resColsInput, resRowsInput,
+    fadeModeSelect, fadeStrengthSlider, fadeEffectSelect
   ];
   autoGenControls.forEach(el => {
     el.addEventListener('input', debouncedGenerate);
