@@ -314,6 +314,7 @@
     <label for="fadeMode">Fade direction:</label>
     <select id="fadeMode">
       <option value="none" selected>None</option>
+      <option value="content">From content outline</option>
       <option value="edges">Edges inward</option>
       <option value="radial">Radial (center out)</option>
       <option value="top">Top to bottom</option>
@@ -322,8 +323,12 @@
       <option value="right">Right to left</option>
     </select>
     <div class="range-row" style="margin-top:8px;">
-      <label>Fade strength: <span class="range-value" id="fadeStrengthVal">50</span>%</label>
+      <label>Fade reach: <span class="range-value" id="fadeStrengthVal">50</span>%</label>
       <input type="range" id="fadeStrength" min="0" max="100" value="50">
+    </div>
+    <div class="checkbox-row" id="fadeOnlyNormalRow" style="margin-top:4px;">
+      <input type="checkbox" id="fadeOnlyNormal" checked>
+      <label for="fadeOnlyNormal" style="margin:0;">Only fade normal (keep highlights)</label>
     </div>
     <label for="fadeEffect" style="margin-top:4px;">Fade effect:</label>
     <select id="fadeEffect">
@@ -502,6 +507,7 @@
   const fadeStrengthSlider = document.getElementById('fadeStrength');
   const fadeStrengthValEl = document.getElementById('fadeStrengthVal');
   const fadeEffectSelect = document.getElementById('fadeEffect');
+  const fadeOnlyNormalCheck = document.getElementById('fadeOnlyNormal');
   const resColsInput = document.getElementById('resCols');
   const resRowsInput = document.getElementById('resRows');
   const lockAspectCheck = document.getElementById('lockAspect');
@@ -745,6 +751,7 @@
     const fadeMode = fadeModeSelect.value;
     const fadeStrength = parseInt(fadeStrengthSlider.value) / 100;
     const fadeEffect = fadeEffectSelect.value;
+    const fadeOnlyNormal = fadeOnlyNormalCheck.checked;
     const isTransparent = transparentBg.checked;
     const bgColor = bgColorInput.value;
 
@@ -823,32 +830,105 @@
     const srcW = sourceImage.width;
     const srcH = sourceImage.height;
 
-    // Fade calculation: returns a value 0..1 where 1 = fully visible, 0 = fully faded
-    function calcFade(col, row) {
-      if (fadeMode === 'none' || fadeStrength === 0) return 1;
-      const nx = cols > 1 ? col / (cols - 1) : 0.5; // 0..1
-      const ny = rows > 1 ? row / (rows - 1) : 0.5;
-      let t; // raw distance toward fade edge, 0 = no fade, 1 = deepest fade
-      switch (fadeMode) {
-        case 'top':    t = 1 - ny; break;
-        case 'bottom': t = ny; break;
-        case 'left':   t = 1 - nx; break;
-        case 'right':  t = nx; break;
-        case 'radial': {
-          const dx = nx - 0.5, dy = ny - 0.5;
-          t = Math.sqrt(dx * dx + dy * dy) / 0.7071; // normalized to corners
-          break;
-        }
-        case 'edges': {
-          const ex = Math.min(nx, 1 - nx); // distance from nearest horizontal edge
-          const ey = Math.min(ny, 1 - ny); // distance from nearest vertical edge
-          t = 1 - Math.min(ex, ey) * 2;    // 1 at edge, 0 at center
-          break;
-        }
-        default: return 1;
+    // --- Pre-compute highlight grid and content distance map ---
+    // Build a grid of which cells are highlighted (needed for content-based fade)
+    const hlGrid = new Uint8Array(cols * rows);
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const x = col * hStep + (row % 2 === 1 ? hStep / 2 : 0);
+        const y = row * vStep;
+        const centerX = x + cellW / 2;
+        const centerY = y + cellH / 2;
+        const srcX = (centerX / (cols * hStep)) * srcW;
+        const srcY = (centerY / (rows * vStep)) * srcH;
+        hlGrid[row * cols + col] = isHighlighted(sourceImage, srcX, srcY, threshold, invert) ? 1 : 0;
       }
-      // Apply strength: higher strength means fade starts earlier
-      const fadeStart = 1 - fadeStrength; // below this t, fully visible
+    }
+
+    // For "content" fade mode: BFS from all highlighted cells to compute
+    // distance (in grid steps) from each cell to nearest highlighted cell.
+    let distMap = null;
+    let maxDist = 1;
+    if (fadeMode === 'content' && fadeStrength > 0) {
+      distMap = new Float32Array(cols * rows);
+      distMap.fill(-1);
+      const queue = [];
+      // Seed BFS with all highlighted cells (distance = 0)
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (hlGrid[r * cols + c]) {
+            distMap[r * cols + c] = 0;
+            queue.push(r * cols + c);
+          }
+        }
+      }
+      // BFS using hex grid neighbors (pointy-top, odd rows offset right)
+      let qi = 0;
+      while (qi < queue.length) {
+        const idx = queue[qi++];
+        const r = Math.floor(idx / cols);
+        const c = idx % cols;
+        const d = distMap[idx];
+        // 6 hex neighbors depending on row parity
+        const isOdd = r % 2 === 1;
+        const neighbors = [
+          [r, c - 1], [r, c + 1],                             // left, right
+          [r - 1, isOdd ? c : c - 1], [r - 1, isOdd ? c + 1 : c], // top-left, top-right
+          [r + 1, isOdd ? c : c - 1], [r + 1, isOdd ? c + 1 : c], // bot-left, bot-right
+        ];
+        for (const [nr, nc] of neighbors) {
+          if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+          const ni = nr * cols + nc;
+          if (distMap[ni] < 0) {
+            distMap[ni] = d + 1;
+            queue.push(ni);
+          }
+        }
+      }
+      // Find max distance for normalization
+      for (let i = 0; i < distMap.length; i++) {
+        if (distMap[i] > maxDist) maxDist = distMap[i];
+      }
+    }
+
+    // Fade calculation: returns a value 0..1 where 1 = fully visible, 0 = fully faded
+    function calcFade(col, row, isHL) {
+      if (fadeMode === 'none' || fadeStrength === 0) return 1;
+      if (fadeOnlyNormal && isHL) return 1; // never fade highlighted cells
+
+      let t; // raw distance toward fade, 0 = no fade, 1 = deepest fade
+
+      if (fadeMode === 'content') {
+        if (isHL) return 1; // highlighted cells are always fully visible in content mode
+        const d = distMap[row * cols + col];
+        if (d <= 0) return 1; // is highlighted or adjacent
+        t = d / maxDist; // normalize 0..1
+      } else {
+        const nx = cols > 1 ? col / (cols - 1) : 0.5;
+        const ny = rows > 1 ? row / (rows - 1) : 0.5;
+        switch (fadeMode) {
+          case 'top':    t = 1 - ny; break;
+          case 'bottom': t = ny; break;
+          case 'left':   t = 1 - nx; break;
+          case 'right':  t = nx; break;
+          case 'radial': {
+            const dx = nx - 0.5, dy = ny - 0.5;
+            t = Math.sqrt(dx * dx + dy * dy) / 0.7071;
+            break;
+          }
+          case 'edges': {
+            const ex = Math.min(nx, 1 - nx);
+            const ey = Math.min(ny, 1 - ny);
+            t = 1 - Math.min(ex, ey) * 2;
+            break;
+          }
+          default: return 1;
+        }
+      }
+      // Apply strength: fadeStrength controls how far the fade reaches
+      // At 100% strength, fade covers the full range. At lower values, only
+      // the outermost portion fades.
+      const fadeStart = 1 - fadeStrength;
       if (t <= fadeStart) return 1;
       return 1 - (t - fadeStart) / (1 - fadeStart);
     }
@@ -857,17 +937,10 @@
 
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
-        // Pointy-top hex position: odd rows offset right by half hStep
         const x = col * hStep + (row % 2 === 1 ? hStep / 2 : 0);
         const y = row * vStep;
 
-        // Map grid center to source image
-        const centerX = x + cellW / 2;
-        const centerY = y + cellH / 2;
-        const srcX = (centerX / (cols * hStep)) * srcW;
-        const srcY = (centerY / (rows * vStep)) * srcH;
-
-        const highlighted = isHighlighted(sourceImage, srcX, srcY, threshold, invert);
+        const highlighted = !!hlGrid[row * cols + col];
 
         // Pick color
         const colorPool = highlighted ? highlightColorList : normalColorList;
@@ -887,12 +960,11 @@
         }
 
         // Calculate fade
-        const fade = calcFade(col, row);
+        const fade = calcFade(col, row, highlighted);
 
         // Apply fade effect
-        if (fade <= 0) continue; // fully faded out
+        if (fade <= 0) continue;
         if (fadeEffect === 'skip' && fade < 1) {
-          // Probabilistic removal: lower fade = more likely to skip
           if (seededRandom() > fade) continue;
         }
 
@@ -916,7 +988,6 @@
         const dx = x * scale + (stampW - sw) / 2;
         const dy = y * scale + (stampH - sh) / 2;
 
-        // Apply opacity fade
         if (fadeEffect === 'opacity' && fade < 1) {
           ctx.globalAlpha = fade;
         }
@@ -946,7 +1017,7 @@
     normalShapeSelect, normalMixSlider, highlightShapeSelect, highlightMixSlider,
     paddingSlider, highlightPaddingSlider, transparentBg, bgColorInput,
     resColsInput, resRowsInput,
-    fadeModeSelect, fadeStrengthSlider, fadeEffectSelect
+    fadeModeSelect, fadeStrengthSlider, fadeEffectSelect, fadeOnlyNormalCheck
   ];
   autoGenControls.forEach(el => {
     el.addEventListener('input', debouncedGenerate);
