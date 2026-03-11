@@ -351,9 +351,6 @@
   </div>
 </div>
 
-<!-- Hidden color picker -->
-<input type="color" id="hiddenColorPicker" class="hidden-input">
-
 <!-- Hidden canvas for source image processing -->
 <canvas id="sourceCanvas" style="display:none;"></canvas>
 
@@ -475,7 +472,7 @@
   const statusText = document.getElementById('statusText');
   const normalColorsEl = document.getElementById('normalColors');
   const highlightColorsEl = document.getElementById('highlightColors');
-  const hiddenColorPicker = document.getElementById('hiddenColorPicker');
+
 
   // ---- Show/hide mix ratio ----
   function updateMixRowVisibility() {
@@ -485,6 +482,22 @@
   updateMixRowVisibility();
 
   // ---- Color palette UI ----
+  // Use a fresh <input type="color"> each time to avoid stale onchange issues
+  function openColorPicker(initialColor, callback) {
+    const picker = document.createElement('input');
+    picker.type = 'color';
+    picker.style.position = 'absolute';
+    picker.style.left = '-9999px';
+    picker.value = initialColor;
+    document.body.appendChild(picker);
+    picker.addEventListener('input', function handler() {
+      callback(picker.value);
+      picker.removeEventListener('input', handler);
+      picker.remove();
+    });
+    picker.click();
+  }
+
   function renderColorList(container, colors) {
     container.innerHTML = '';
     colors.forEach((c, i) => {
@@ -504,12 +517,10 @@
       chip.appendChild(rm);
 
       chip.addEventListener('click', () => {
-        hiddenColorPicker.value = c;
-        hiddenColorPicker.onchange = () => {
-          colors[i] = hiddenColorPicker.value;
+        openColorPicker(c, (newColor) => {
+          colors[i] = newColor;
           renderColorList(container, colors);
-        };
-        hiddenColorPicker.click();
+        });
       });
       container.appendChild(chip);
     });
@@ -518,12 +529,10 @@
     addBtn.className = 'add-color-btn';
     addBtn.textContent = '+';
     addBtn.addEventListener('click', () => {
-      hiddenColorPicker.value = '#ffffff';
-      hiddenColorPicker.onchange = () => {
-        colors.push(hiddenColorPicker.value);
+      openColorPicker('#b9cf3d', (newColor) => {
+        colors.push(newColor);
         renderColorList(container, colors);
-      };
-      hiddenColorPicker.click();
+      });
     });
     container.appendChild(addBtn);
   }
