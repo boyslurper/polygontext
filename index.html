@@ -234,7 +234,12 @@
   <!-- Resolution -->
   <div class="section">
     <h2>Resolution</h2>
-    <div class="inline-row">
+    <label for="canvasShape">Canvas shape:</label>
+    <select id="canvasShape">
+      <option value="rect" selected>Rectangle</option>
+      <option value="hexagon">Hexagon</option>
+    </select>
+    <div class="inline-row" style="margin-top:6px;">
       <label>Cols:</label>
       <input type="number" id="resCols" value="40" min="3" max="500">
       <span class="x-sep">x</span>
@@ -450,6 +455,7 @@
   const thresholdSlider = $('threshold');
   const thresholdValEl = $('thresholdVal');
   const invertInput = $('invertInput');
+  const canvasShapeSelect = $('canvasShape');
   const resColsInput = $('resCols');
   const resRowsInput = $('resRows');
   const lockAspectCheck = $('lockAspect');
@@ -685,6 +691,19 @@
   }
 
   // ---- Seeded random ----
+  // ---- Hexagon mask test ----
+  // Tests if pixel (px, py) is inside a pointy-top regular hexagon
+  // centered at (cx, cy) with circumradius R (center to vertex).
+  // Uses cube-coordinate conversion: inside when max(|q|,|r|,|s|) <= 1.
+  function insideHexagon(px, py, cx, cy, R) {
+    const dx = (px - cx) / R;
+    const dy = (py - cy) / R;
+    const q = (Math.sqrt(3) / 3 * dx - dy / 3);
+    const r = (2 / 3 * dy);
+    const s = -q - r;
+    return Math.max(Math.abs(q), Math.abs(r), Math.abs(s)) <= 1;
+  }
+
   let seed = 42;
   function resetSeed() { seed = 42; }
   function seededRandom() {
@@ -715,6 +734,7 @@
 
     const cols = Math.max(3, parseInt(resColsInput.value) || 40);
     const rows = Math.max(3, parseInt(resRowsInput.value) || 20);
+    const canvasShape = canvasShapeSelect.value;
     const padding = parseInt(paddingSlider.value);
     const highlightPadding = parseInt(highlightPaddingSlider.value);
     const threshold = parseInt(thresholdSlider.value);
@@ -723,7 +743,7 @@
     const highlightShapeSetting = highlightShapeSelect.value;
     const normalMixRatio = parseInt(normalMixSlider.value) / 100;
     const highlightMixRatio = parseInt(highlightMixSlider.value) / 100;
-    const fadeMode = fadeModeSelect.value;
+    const fadeMode = canvasShape === 'hexagon' ? 'none' : fadeModeSelect.value;
     const fadeStrength = parseInt(fadeStrengthSlider.value) / 100;
     const fadeCurve = parseInt(fadeCurveSlider.value) / 10;
     const fadeEffect = fadeEffectSelect.value;
@@ -855,12 +875,28 @@
       return Math.max(0, Math.pow(linear, fadeCurve));
     }
 
+    // Hexagon canvas mask parameters
+    const hexCX = outW / 2;
+    const hexCY = outH / 2;
+    const hexR = Math.min(outW, outH) / 2;
+
     resetSeed();
 
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
         const x = col * hStep + (row % 2 === 1 ? hStep / 2 : 0);
         const y = row * vStep;
+
+        // Hexagon canvas shape masking: skip cells outside the hex boundary
+        if (canvasShape === 'hexagon') {
+          const cx = x + cellW / 2;
+          const cy = y + cellH / 2;
+          if (!insideHexagon(cx, cy, hexCX, hexCY, hexR)) {
+            seededRandom(); // consume RNG to keep determinism
+            continue;
+          }
+        }
+
         const highlighted = !!hlGrid[row * cols + col];
 
         const colorPool = highlighted ? highlightColorList : normalColorList;
@@ -938,7 +974,7 @@
   [thresholdSlider, invertInput,
    normalShapeSelect, normalMixSlider, highlightShapeSelect, highlightMixSlider,
    paddingSlider, highlightPaddingSlider, transparentBg, bgColorInput,
-   resColsInput, resRowsInput,
+   canvasShapeSelect, resColsInput, resRowsInput,
    fadeModeSelect, fadeStrengthSlider, fadeCurveSlider, fadeEffectSelect, fadeOnlyNormalCheck
   ].forEach(el => {
     el.addEventListener('input', debouncedGenerate);
@@ -983,7 +1019,8 @@
     const highlightShapeSetting = highlightShapeSelect.value;
     const normalMixRatio = parseInt(normalMixSlider.value) / 100;
     const highlightMixRatio = parseInt(highlightMixSlider.value) / 100;
-    const fadeMode = fadeModeSelect.value;
+    const canvasShape = canvasShapeSelect.value;
+    const fadeMode = canvasShape === 'hexagon' ? 'none' : fadeModeSelect.value;
     const fadeStrength = parseInt(fadeStrengthSlider.value) / 100;
     const fadeCurve = parseInt(fadeCurveSlider.value) / 10;
     const fadeEffect = fadeEffectSelect.value;
@@ -1102,12 +1139,28 @@
       elements += `  <rect width="${outW}" height="${outH}" fill="${bgColor}"/>\n`;
     }
 
+    // Hexagon canvas mask parameters
+    const hexCX = outW / 2;
+    const hexCY = outH / 2;
+    const hexR = Math.min(outW, outH) / 2;
+
     resetSeed();
 
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
         const x = col * hStep + (row % 2 === 1 ? hStep / 2 : 0);
         const y = row * vStep;
+
+        // Hexagon canvas shape masking
+        if (canvasShape === 'hexagon') {
+          const cx = x + cellW / 2;
+          const cy = y + cellH / 2;
+          if (!insideHexagon(cx, cy, hexCX, hexCY, hexR)) {
+            seededRandom();
+            continue;
+          }
+        }
+
         const highlighted = !!hlGrid[row * cols + col];
 
         const colorPool = highlighted ? highlightColorList : normalColorList;
