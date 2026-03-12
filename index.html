@@ -696,12 +696,16 @@
   // centered at (cx, cy) with circumradius R (center to vertex).
   // Uses cube-coordinate conversion: inside when max(|q|,|r|,|s|) <= 1.
   function insideHexagon(px, py, cx, cy, R) {
-    const dx = (px - cx) / R;
-    const dy = (py - cy) / R;
-    const q = (Math.sqrt(3) / 3 * dx - dy / 3);
-    const r = (2 / 3 * dy);
-    const s = -q - r;
-    return Math.max(Math.abs(q), Math.abs(r), Math.abs(s)) <= 1;
+    // Pointy-top regular hexagon containment test.
+    // Circumradius R = center to vertex distance.
+    // Inradius = R * sqrt(3)/2 = center to flat-edge midpoint.
+    // Two constraint pairs (using symmetry via abs):
+    //   1) |dx| <= inradius  (flat left/right edges)
+    //   2) |dx|/sqrt(3) + |dy| <= R  (sloped top/bottom edges)
+    const dx = Math.abs(px - cx);
+    const dy = Math.abs(py - cy);
+    return dx <= R * 0.8660254037844386 &&
+           dx * 0.5773502691896258 + dy <= R;
   }
 
   let seed = 42;
