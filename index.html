@@ -348,6 +348,7 @@
     </div>
     <div class="btn-row" style="margin-top:8px;">
       <button class="btn btn-primary" id="btnExport">Export PNG</button>
+      <button class="btn btn-secondary" id="btnExportSvg">Export SVG</button>
     </div>
   </div>
 </div>
@@ -938,7 +939,7 @@
     generate();
   });
 
-  // ---- Export ----
+  // ---- Export PNG ----
   $('btnExport').addEventListener('click', async () => {
     buildSource();
     const scale = parseInt(outputScaleSlider.value);
@@ -950,6 +951,220 @@
     link.click();
     statusText.textContent = 'Exported at ' + scale + 'x scale';
     if (scale !== 1) { stampCache.clear(); generate(); }
+  });
+
+  // ---- Export SVG ----
+  // Builds a true vector SVG with each polygon as an SVG element.
+  // Hollow hex: <polygon> element matching hohl_polygon.svg
+  // Filled hex: <path> element matching Frenzelit_Polygon_Flaeche.svg
+  $('btnExportSvg').addEventListener('click', () => {
+    buildSource();
+    if (!sourceImage) return;
+
+    const cols = Math.max(3, parseInt(resColsInput.value) || 40);
+    const rows = Math.max(3, parseInt(resRowsInput.value) || 20);
+    const padding = parseInt(paddingSlider.value);
+    const highlightPadding = parseInt(highlightPaddingSlider.value);
+    const threshold = parseInt(thresholdSlider.value);
+    const invert = invertInput.checked;
+    const normalShapeSetting = normalShapeSelect.value;
+    const highlightShapeSetting = highlightShapeSelect.value;
+    const normalMixRatio = parseInt(normalMixSlider.value) / 100;
+    const highlightMixRatio = parseInt(highlightMixSlider.value) / 100;
+    const fadeMode = fadeModeSelect.value;
+    const fadeStrength = parseInt(fadeStrengthSlider.value) / 100;
+    const fadeEffect = fadeEffectSelect.value;
+    const fadeOnlyNormal = fadeOnlyNormalCheck.checked;
+    const isTransparent = transparentBg.checked;
+    const bgColor = bgColorInput.value;
+
+    const refAspect = FILLED_ASPECT;
+    const targetWidth = 1200;
+    const cellH = Math.max(4, Math.round(
+      (targetWidth - cols * padding) / (cols * refAspect + refAspect / 2)
+    ));
+    const cellW = Math.max(4, Math.round(cellH * refAspect));
+    const hStep = cellW + padding;
+    const vStep = Math.round(cellH * 0.75) + padding;
+    const outW = Math.ceil(cols * hStep + cellW / 2 + padding);
+    const outH = Math.ceil(rows * vStep + cellH * 0.25 + padding);
+
+    const hlCellH = Math.max(4, cellH - highlightPadding);
+    const hlCellW = Math.max(4, Math.round(hlCellH * refAspect));
+
+    const srcW = sourceImage.width;
+    const srcH = sourceImage.height;
+
+    // Pre-compute highlight grid
+    const hlGrid = new Uint8Array(cols * rows);
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const x = c * hStep + (r % 2 === 1 ? hStep / 2 : 0);
+        const y = r * vStep;
+        const sx = ((x + cellW / 2) / (cols * hStep)) * srcW;
+        const sy = ((y + cellH / 2) / (rows * vStep)) * srcH;
+        hlGrid[r * cols + c] = isHighlighted(sourceImage, sx, sy, threshold, invert) ? 1 : 0;
+      }
+    }
+
+    // Content-distance BFS (same as generate)
+    let distMap = null;
+    let maxDist = 1;
+    if (fadeMode === 'content' && fadeStrength > 0) {
+      distMap = new Float32Array(cols * rows).fill(-1);
+      const queue = [];
+      for (let i = 0; i < hlGrid.length; i++) {
+        if (hlGrid[i]) { distMap[i] = 0; queue.push(i); }
+      }
+      let qi = 0;
+      while (qi < queue.length) {
+        const idx = queue[qi++];
+        const r = Math.floor(idx / cols), c = idx % cols, d = distMap[idx];
+        const odd = r % 2 === 1;
+        const nb = [
+          [r, c-1], [r, c+1],
+          [r-1, odd ? c : c-1], [r-1, odd ? c+1 : c],
+          [r+1, odd ? c : c-1], [r+1, odd ? c+1 : c],
+        ];
+        for (const [nr, nc] of nb) {
+          if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+          const ni = nr * cols + nc;
+          if (distMap[ni] < 0) { distMap[ni] = d + 1; queue.push(ni); }
+        }
+      }
+      for (let i = 0; i < distMap.length; i++) {
+        if (distMap[i] > maxDist) maxDist = distMap[i];
+      }
+    }
+
+    function calcFadeSvg(col, row, isHL) {
+      if (fadeMode === 'none' || fadeStrength === 0) return 1;
+      if (fadeOnlyNormal && isHL) return 1;
+      let t;
+      if (fadeMode === 'content') {
+        if (isHL) return 1;
+        const d = distMap[row * cols + col];
+        if (d <= 0) return 1;
+        t = d / maxDist;
+      } else {
+        const nx = cols > 1 ? col / (cols - 1) : 0.5;
+        const ny = rows > 1 ? row / (rows - 1) : 0.5;
+        switch (fadeMode) {
+          case 'top':    t = 1 - ny; break;
+          case 'bottom': t = ny; break;
+          case 'left':   t = 1 - nx; break;
+          case 'right':  t = nx; break;
+          case 'radial': {
+            const dx = nx - 0.5, dy = ny - 0.5;
+            t = Math.sqrt(dx * dx + dy * dy) / 0.7071;
+            break;
+          }
+          case 'edges': {
+            t = 1 - Math.min(Math.min(nx, 1 - nx), Math.min(ny, 1 - ny)) * 2;
+            break;
+          }
+          default: return 1;
+        }
+      }
+      const fadeStart = 1 - fadeStrength;
+      if (t <= fadeStart) return 1;
+      return Math.max(0, 1 - (t - fadeStart) / (1 - fadeStart));
+    }
+
+    // SVG viewBox dimensions for the source shapes
+    const HOLLOW_VB_W = 403, HOLLOW_VB_H = 459.9298;
+    const FILLED_VB_W = 763.24, FILLED_VB_H = 856.81;
+
+    // Hollow hex polygon points (from hohl_polygon.svg)
+    const hollowPoints = '385.5 336.19735 385.5 123.73245 201.5 17.5 17.5 123.73245 17.5 336.19735 201.5 442.4298 385.5 336.19735';
+    // Filled hex path (from Frenzelit_Polygon_Flaeche.svg)
+    const filledPath = 'M374.2,39.66L47.34,225.23c-6.39,3.63-10.34,10.41-10.34,17.75v368.22c0,7.3,3.9,14.05,10.23,17.69l326.93,188.18c6.34,3.65,14.16,3.63,20.48-.06l321.48-187.75c6.27-3.66,10.12-10.37,10.12-17.63V245.3c0-7.26-3.85-13.97-10.12-17.63L394.58,39.79c-6.28-3.67-14.05-3.72-20.38-.13Z';
+
+    // Build SVG elements
+    let elements = '';
+
+    // Background rect
+    if (!isTransparent) {
+      elements += `  <rect width="${outW}" height="${outH}" fill="${bgColor}"/>\n`;
+    }
+
+    resetSeed();
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const x = col * hStep + (row % 2 === 1 ? hStep / 2 : 0);
+        const y = row * vStep;
+        const highlighted = !!hlGrid[row * cols + col];
+
+        const colorPool = highlighted ? highlightColorList : normalColorList;
+        if (colorPool.length === 0) { seededRandom(); continue; }
+        const color = colorPool[Math.floor(seededRandom() * colorPool.length)];
+
+        let shapeType;
+        if (highlighted) {
+          if (highlightShapeSetting === 'filled') shapeType = 'filled';
+          else if (highlightShapeSetting === 'hollow') shapeType = 'hollow';
+          else shapeType = seededRandom() < highlightMixRatio ? 'filled' : 'hollow';
+        } else {
+          if (normalShapeSetting === 'filled') shapeType = 'filled';
+          else if (normalShapeSetting === 'hollow') shapeType = 'hollow';
+          else shapeType = seededRandom() < normalMixRatio ? 'filled' : 'hollow';
+        }
+
+        const fade = calcFadeSvg(col, row, highlighted);
+        if (fade <= 0) continue;
+
+        if (fadeEffect === 'skip' && fade < 1) {
+          if (spatialHash(col, row) > fade) continue;
+        }
+
+        const useHL = highlighted && highlightPadding > 0;
+        let drawW = useHL ? hlCellW : cellW;
+        let drawH = useHL ? hlCellH : cellH;
+
+        if (fadeEffect === 'shrink' && fade < 1) {
+          drawW = Math.round(drawW * fade);
+          drawH = Math.round(drawH * fade);
+          if (drawW < 1 || drawH < 1) continue;
+        }
+
+        const opacity = (fadeEffect === 'opacity' && fade < 1) ? fade : 1;
+
+        // Position: center the polygon in its cell
+        const dx = x + (cellW - drawW) / 2;
+        const dy = y + (cellH - drawH) / 2;
+
+        if (shapeType === 'filled') {
+          // Scale the filled path from its viewBox to drawW x drawH
+          const sx = drawW / FILLED_VB_W;
+          const sy = drawH / FILLED_VB_H;
+          elements += `  <path d="${filledPath}" fill="${color}" stroke="${color}" stroke-miterlimit="10" stroke-width="74"`;
+          elements += ` transform="translate(${dx.toFixed(2)},${dy.toFixed(2)}) scale(${sx.toFixed(6)},${sy.toFixed(6)})"`;
+          if (opacity < 1) elements += ` opacity="${opacity.toFixed(3)}"`;
+          elements += `/>\n`;
+        } else {
+          // Scale the hollow polygon from its viewBox to drawW x drawH
+          const sx = drawW / HOLLOW_VB_W;
+          const sy = drawH / HOLLOW_VB_H;
+          elements += `  <polygon points="${hollowPoints}" fill="none" stroke="${color}" stroke-linecap="round" stroke-linejoin="round" stroke-width="35"`;
+          elements += ` transform="translate(${dx.toFixed(2)},${dy.toFixed(2)}) scale(${sx.toFixed(6)},${sy.toFixed(6)})"`;
+          if (opacity < 1) elements += ` opacity="${opacity.toFixed(3)}"`;
+          elements += `/>\n`;
+        }
+      }
+    }
+
+    const svgDoc = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${outW} ${outH}" width="${outW}" height="${outH}">
+${elements}</svg>`;
+
+    const blob = new Blob([svgDoc], { type: 'image/svg+xml' });
+    const link = document.createElement('a');
+    link.download = 'polygon-art.svg';
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    URL.revokeObjectURL(link.href);
+    statusText.textContent = 'Exported SVG (' + Math.round(blob.size / 1024) + ' KB)';
   });
 
   // ---- Initial render ----
